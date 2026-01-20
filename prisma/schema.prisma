@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sport {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  teams     Team[]
+  bets      Bet[]
+  createdAt DateTime @default(now())
+}
+
+model Team {
+  id           String   @id @default(cuid())
+  name         String
+  sportId      String
+  sport        Sport    @relation(fields: [sportId], references: [id])
+  betsAsTeamA  Bet[]    @relation("TeamA")
+  betsAsTeamB  Bet[]    @relation("TeamB")
+  createdAt    DateTime @default(now())
+
+  @@unique([sportId, name])
+}
+
+model BetType {
+  id          String  @id @default(cuid())
+  code        String  @unique
+  name        String
+  description String?
+  bets        Bet[]
+}
+
+enum SelectedTeam {
+  A
+  B
+}
+
+model Bet {
+  id                String       @id @default(cuid())
+  sportId           String
+  sport             Sport        @relation(fields: [sportId], references: [id])
+  teamAId           String
+  teamA             Team         @relation("TeamA", fields: [teamAId], references: [id])
+  teamBId           String
+  teamB             Team         @relation("TeamB", fields: [teamBId], references: [id])
+  selectedTeam      SelectedTeam
+  betTypeId         String
+  betType           BetType      @relation(fields: [betTypeId], references: [id])
+  pAgent            Float
+  pMarket           Float
+  predictedEdge     Float
+  recommendedAmount Int?
+  actualAmount      Int?
+  result            Int?
+  realizedEdge      Float?
+  profitLoss        Float?
+  createdAt         DateTime     @default(now())
+  settledAt         DateTime?
+
+  @@index([sportId])
+  @@index([teamAId])
+  @@index([teamBId])
+  @@index([betTypeId])
+  @@index([createdAt])
+}
+
+model Balance {
+  id            String   @id @default("main")
+  initialAmount Float    @default(5000)
+  currentAmount Float    @default(5000)
+  totalProfit   Float    @default(0)
+  totalBets     Int      @default(0)
+  wins          Int      @default(0)
+  losses        Int      @default(0)
+  updatedAt     DateTime @default(now()) @updatedAt
+}
+
+model BalanceHistory {
+  id        String   @id @default(cuid())
+  amount    Float
+  profit    Float
+  betId     String?
+  type      String   // "INITIAL" | "WIN" | "LOSS"
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
