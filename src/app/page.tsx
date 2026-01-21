@@ -62,9 +62,10 @@ export default function DashboardPage() {
         const streakDataRes = await streakRes.json();
 
         setBalance(balanceData);
-        setRecentBets(betsData.slice(0, 5));
-        setBalanceHistory(historyData);
-        setPendingCount(betsData.filter((b: RecentBet) => b.result === null).length);
+        const betsArray = Array.isArray(betsData) ? betsData : [];
+        setRecentBets(betsArray.slice(0, 5));
+        setBalanceHistory(Array.isArray(historyData) ? historyData : []);
+        setPendingCount(betsArray.filter((b: RecentBet) => b.result === null).length);
         setStreakData(streakDataRes);
       } catch (error) {
         console.error('Failed to fetch data:', error);
