@@ -1,4 +1,4 @@
-export const SPORTS = ['NBA', 'NHL', 'MLB'] as const;
+export const SPORTS = ['NBA', 'NHL', 'MLB', 'NFL'] as const;
 export type SportName = (typeof SPORTS)[number];
 
 export const TEAMS: Record<SportName, string[]> = {
@@ -31,5 +31,23 @@ export const TEAMS: Record<SportName, string[]> = {
     'Philadelphia Phillies', 'Pittsburgh Pirates', 'San Diego Padres', 'San Francisco Giants',
     'Seattle Mariners', 'St. Louis Cardinals', 'Tampa Bay Rays', 'Texas Rangers',
     'Toronto Blue Jays', 'Washington Nationals',
+  ],
+  NFL: [
+    // AFC East
+    'Buffalo Bills', 'Miami Dolphins', 'New England Patriots', 'New York Jets',
+    // AFC North
+    'Baltimore Ravens', 'Cincinnati Bengals', 'Cleveland Browns', 'Pittsburgh Steelers',
+    // AFC South
+    'Houston Texans', 'Indianapolis Colts', 'Jacksonville Jaguars', 'Tennessee Titans',
+    // AFC West
+    'Denver Broncos', 'Kansas City Chiefs', 'Las Vegas Raiders', 'Los Angeles Chargers',
+    // NFC East
+    'Dallas Cowboys', 'New York Giants', 'Philadelphia Eagles', 'Washington Commanders',
+    // NFC North
+    'Chicago Bears', 'Detroit Lions', 'Green Bay Packers', 'Minnesota Vikings',
+    // NFC South
+    'Atlanta Falcons', 'Carolina Panthers', 'New Orleans Saints', 'Tampa Bay Buccaneers',
+    // NFC West
+    'Arizona Cardinals', 'Los Angeles Rams', 'San Francisco 49ers', 'Seattle Seahawks',
   ],
 };

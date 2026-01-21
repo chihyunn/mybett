@@ -18,6 +18,7 @@ const SPORT_ICONS: Record<string, string> = {
   NBA: '🏀',
   MLB: '⚾',
   NHL: '🏒',
+  NFL: '🏈',
 };
 
 const SPORT_COLORS: Record<string, { active: string; inactive: string }> = {
@@ -32,6 +33,10 @@ const SPORT_COLORS: Record<string, { active: string; inactive: string }> = {
   NHL: {
     active: 'bg-blue-700 text-white ring-2 ring-blue-300',
     inactive: 'bg-gray-100 text-gray-700 hover:bg-blue-100',
+  },
+  NFL: {
+    active: 'bg-green-700 text-white ring-2 ring-green-300',
+    inactive: 'bg-gray-100 text-gray-700 hover:bg-green-100',
   },
 };
 
