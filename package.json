@@ -6,7 +6,6 @@
     "dev": "next dev",
     "dev:local": "./scripts/dev.sh",
     "build": "prisma generate && prisma migrate deploy && next build",
-    "postbuild": "npx tsx prisma/seed.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",

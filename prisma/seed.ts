@@ -48,6 +48,24 @@ interface SeedData {
 async function main() {
   console.log('🌱 Seeding database...');
 
+  // Check if database already has data - skip if so (prevent accidental data loss)
+  const existingBets = await prisma.bet.count();
+  const existingBalance = await prisma.balance.findUnique({ where: { id: 'main' } });
+
+  if (existingBets > 0 || (existingBalance && existingBalance.totalBets > 0)) {
+    console.log('⚠️ Database already has data! Skipping seed to prevent data loss.');
+    console.log(`   - Existing bets: ${existingBets}`);
+    console.log(`   - Balance total bets: ${existingBalance?.totalBets || 0}`);
+    console.log('   - Use --force flag to override: npx tsx prisma/seed.ts --force');
+
+    // Only proceed with force flag
+    if (!process.argv.includes('--force')) {
+      console.log('🛡️ Seed cancelled - your data is safe!');
+      return;
+    }
+    console.log('⚠️ Force flag detected - proceeding with seed...');
+  }
+
   // Check if seed-data.json exists (migration mode)
   const seedDataPath = path.join(__dirname, 'seed-data.json');
 

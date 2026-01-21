@@ -102,8 +102,8 @@ export default function SettingsPage() {
             }`}
           >
             <span
-              className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                theme === 'dark' ? 'translate-x-7' : 'translate-x-1'
+              className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-200 ${
+                theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
               }`}
             />
           </button>
