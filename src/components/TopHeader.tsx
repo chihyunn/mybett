@@ -8,6 +8,7 @@ const navItems = [
   { href: '/predict', label: '예측 입력' },
   { href: '/history', label: '베팅 기록' },
   { href: '/analysis', label: '분석' },
+  { href: '/settings', label: '설정' },
 ];
 
 export default function TopHeader() {

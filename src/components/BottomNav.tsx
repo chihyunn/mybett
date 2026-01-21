@@ -8,6 +8,7 @@ const navItems = [
   { href: '/predict', icon: '🎯', label: '예측' },
   { href: '/history', icon: '📋', label: '기록' },
   { href: '/analysis', icon: '📊', label: '분석' },
+  { href: '/settings', icon: '⚙️', label: '설정' },
 ];
 
 export default function BottomNav() {
