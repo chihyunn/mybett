@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import LoginScreen from './LoginScreen';
 import TopHeader from './TopHeader';
 import BottomNav from './BottomNav';
@@ -14,7 +15,7 @@ function AppContent({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <TopHeader />
       <main className="pb-20 md:pb-8">
         {children}
@@ -26,8 +27,10 @@ function AppContent({ children }: { children: ReactNode }) {
 
 export default function AppShell({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <AppContent>{children}</AppContent>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent>{children}</AppContent>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
