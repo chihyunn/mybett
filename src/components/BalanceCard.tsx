@@ -1,5 +1,7 @@
 'use client';
 
+import AnimatedNumber from './AnimatedNumber';
+
 interface BalanceCardProps {
   initialAmount: number;
   currentAmount: number;
@@ -16,13 +18,16 @@ export default function BalanceCard({ initialAmount, currentAmount }: BalanceCar
     >
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium" style={{ color: 'var(--muted)' }}>현재 밸런스</h3>
-        <span className="text-xs" style={{ color: 'var(--muted)' }}>시작: ${initialAmount.toLocaleString()}</span>
+        <span className="text-xs" style={{ color: 'var(--muted)' }}>
+          시작: $<AnimatedNumber value={initialAmount} />
+        </span>
       </div>
       <div className="text-3xl font-bold" style={{ color: 'var(--foreground)' }}>
-        ${currentAmount.toLocaleString()}
+        $<AnimatedNumber value={currentAmount} duration={1000} />
       </div>
       <div className={`text-sm mt-2 ${difference >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-        {difference >= 0 ? '▲' : '▼'} ${Math.abs(difference).toLocaleString()} ({percentChange >= 0 ? '+' : ''}{percentChange.toFixed(1)}%)
+        {difference >= 0 ? '▲' : '▼'} $<AnimatedNumber value={Math.abs(difference)} /> (
+        <AnimatedNumber value={percentChange} decimals={1} prefix={percentChange >= 0 ? '+' : ''} suffix="%" />)
       </div>
     </div>
   );

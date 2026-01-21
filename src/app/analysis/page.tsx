@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AnalysisTable from '@/components/AnalysisTable';
 import PortfolioSummary from '@/components/PortfolioSummary';
 import MddCard from '@/components/MddCard';
+import ROIAnalysis from '@/components/ROIAnalysis';
 
 interface Sport {
   id: string;
@@ -67,7 +68,7 @@ export default function AnalysisPage() {
   const [sports, setSports] = useState<Sport[]>([]);
   const [sportId, setSportId] = useState<string>('');
   const [minBets, setMinBets] = useState<number>(1);
-  const [view, setView] = useState<'team' | 'betType' | 'cross'>('team');
+  const [view, setView] = useState<'team' | 'betType' | 'cross' | 'roi'>('team');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -225,6 +226,17 @@ export default function AnalysisPage() {
               >
                 종합
               </button>
+              <button
+                type="button"
+                onClick={() => setView('roi')}
+                className={`flex-1 px-2 py-2 rounded-md text-xs md:text-sm font-medium ${
+                  view === 'roi'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                ROI 📈
+              </button>
             </div>
           </div>
         </div>
@@ -245,43 +257,48 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* Analysis Table */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">
-              {view === 'team' ? '팀별 예측 정확도' : view === 'betType' ? '베팅타입별 예측 정확도' : '스포츠 x 베팅타입 분석'}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {view === 'cross'
-                ? '스포츠별 베팅타입 조합 성과 분석'
-                : '예측 오차 = 예상 우위 - 실제 결과 (양수: 낙관적 예측, 음수: 보수적 예측)'
-              }
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="p-4">
-              <div className="animate-pulse space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="h-10 bg-gray-200 rounded w-32"></div>
-                    <div className="h-10 bg-gray-200 rounded flex-1"></div>
-                    <div className="h-10 bg-gray-200 rounded w-20"></div>
-                    <div className="h-10 bg-gray-200 rounded w-20"></div>
-                  </div>
-                ))}
-              </div>
+        {/* ROI Analysis */}
+        {view === 'roi' ? (
+          <ROIAnalysis />
+        ) : (
+          /* Analysis Table */
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {view === 'team' ? '팀별 예측 정확도' : view === 'betType' ? '베팅타입별 예측 정확도' : '스포츠 x 베팅타입 분석'}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {view === 'cross'
+                  ? '스포츠별 베팅타입 조합 성과 분석'
+                  : '예측 오차 = 예상 우위 - 실제 결과 (양수: 낙관적 예측, 음수: 보수적 예측)'
+                }
+              </p>
             </div>
-          ) : view === 'cross' ? (
-            <CrossAnalysisTable data={sportBetTypeAnalysis} />
-          ) : (
-            <AnalysisTable
-              teamAnalysis={teamAnalysis}
-              betTypeAnalysis={betTypeAnalysis}
-              view={view}
-            />
-          )}
-        </div>
+
+            {loading ? (
+              <div className="p-4">
+                <div className="animate-pulse space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="h-10 bg-gray-200 rounded w-32"></div>
+                      <div className="h-10 bg-gray-200 rounded flex-1"></div>
+                      <div className="h-10 bg-gray-200 rounded w-20"></div>
+                      <div className="h-10 bg-gray-200 rounded w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : view === 'cross' ? (
+              <CrossAnalysisTable data={sportBetTypeAnalysis} />
+            ) : (
+              <AnalysisTable
+                teamAnalysis={teamAnalysis}
+                betTypeAnalysis={betTypeAnalysis}
+                view={view as 'team' | 'betType'}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

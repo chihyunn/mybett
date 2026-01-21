@@ -1,5 +1,7 @@
 'use client';
 
+import AnimatedNumber from './AnimatedNumber';
+
 interface StatsCardProps {
   totalBets: number;
   wins: number;
@@ -19,12 +21,14 @@ export default function StatsCard({ totalBets, wins, losses }: StatsCardProps) {
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{totalBets}</div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+            <AnimatedNumber value={totalBets} />
+          </div>
           <div className="text-xs" style={{ color: 'var(--muted)' }}>총 베팅</div>
         </div>
         <div>
           <div className={`text-2xl font-bold ${winRate >= 50 ? 'text-green-500' : 'text-red-500'}`}>
-            {winRate.toFixed(1)}%
+            <AnimatedNumber value={winRate} decimals={1} suffix="%" />
           </div>
           <div className="text-xs" style={{ color: 'var(--muted)' }}>승률</div>
         </div>
@@ -32,14 +36,14 @@ export default function StatsCard({ totalBets, wins, losses }: StatsCardProps) {
 
       <div className="flex gap-2 text-sm">
         <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded">
-          승 {wins}
+          승 <AnimatedNumber value={wins} />
         </span>
         <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">
-          패 {losses}
+          패 <AnimatedNumber value={losses} />
         </span>
         {pending > 0 && (
           <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
-            대기 {pending}
+            대기 <AnimatedNumber value={pending} />
           </span>
         )}
       </div>
