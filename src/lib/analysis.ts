@@ -1,5 +1,28 @@
 import prisma from '@/lib/db';
 
+export interface MaxDrawdownData {
+  maxDrawdown: number;        // 최대 손실액 (음수)
+  maxDrawdownPercent: number; // 최대 손실률 (음수)
+  peakAmount: number;         // 최고점
+  troughAmount: number;       // 최저점
+  recoveryStatus: 'recovered' | 'recovering' | 'none';
+  currentDrawdown: number;    // 현재 드로우다운
+  currentDrawdownPercent: number;
+}
+
+export interface SportBetTypeAnalysis {
+  sportId: string;
+  sportName: string;
+  betTypeCode: string;
+  betTypeName: string;
+  betCount: number;
+  avgPredictedEdge: number;
+  avgRealizedEdge: number;
+  edgeError: number;
+  winRate: number;
+  totalProfit: number;
+}
+
 export interface TeamAnalysis {
   teamId: string;
   teamName: string;
@@ -218,4 +241,161 @@ export async function getPortfolioAnalysis(sportId?: string): Promise<PortfolioA
     winRate: wins / totalBets,
     totalProfit,
   };
+}
+
+/**
+ * Calculate Max Drawdown (MDD) from balance history
+ */
+export async function getMaxDrawdown(): Promise<MaxDrawdownData> {
+  const history = await prisma.balanceHistory.findMany({
+    orderBy: { createdAt: 'asc' },
+  });
+
+  if (history.length === 0) {
+    return {
+      maxDrawdown: 0,
+      maxDrawdownPercent: 0,
+      peakAmount: 0,
+      troughAmount: 0,
+      recoveryStatus: 'none',
+      currentDrawdown: 0,
+      currentDrawdownPercent: 0,
+    };
+  }
+
+  let peak = history[0].amount;
+  let peakIndex = 0;
+  let maxDrawdown = 0;
+  let maxDrawdownPercent = 0;
+  let troughAmount = history[0].amount;
+  let peakAmount = history[0].amount;
+  let mddPeakIndex = 0;
+  let mddTroughIndex = 0;
+
+  // Find maximum drawdown
+  for (let i = 0; i < history.length; i++) {
+    const amount = history[i].amount;
+
+    if (amount > peak) {
+      peak = amount;
+      peakIndex = i;
+    }
+
+    const drawdown = amount - peak;
+    const drawdownPercent = peak > 0 ? (drawdown / peak) : 0;
+
+    if (drawdown < maxDrawdown) {
+      maxDrawdown = drawdown;
+      maxDrawdownPercent = drawdownPercent;
+      peakAmount = peak;
+      troughAmount = amount;
+      mddPeakIndex = peakIndex;
+      mddTroughIndex = i;
+    }
+  }
+
+  // Calculate current drawdown
+  const currentAmount = history[history.length - 1].amount;
+  const currentPeak = Math.max(...history.map(h => h.amount));
+  const currentDrawdown = currentAmount - currentPeak;
+  const currentDrawdownPercent = currentPeak > 0 ? (currentDrawdown / currentPeak) : 0;
+
+  // Determine recovery status
+  let recoveryStatus: 'recovered' | 'recovering' | 'none' = 'none';
+  if (maxDrawdown < 0) {
+    // Check if we recovered from MDD
+    const afterMddTrough = history.slice(mddTroughIndex + 1);
+    const recoveredPeak = afterMddTrough.some(h => h.amount >= peakAmount);
+
+    if (recoveredPeak) {
+      recoveryStatus = 'recovered';
+    } else if (currentAmount > troughAmount) {
+      recoveryStatus = 'recovering';
+    }
+  }
+
+  return {
+    maxDrawdown,
+    maxDrawdownPercent,
+    peakAmount,
+    troughAmount,
+    recoveryStatus,
+    currentDrawdown,
+    currentDrawdownPercent,
+  };
+}
+
+/**
+ * Get Sport x BetType cross-analysis
+ */
+export async function getSportBetTypeAnalysis(): Promise<SportBetTypeAnalysis[]> {
+  const settledBets = await prisma.bet.findMany({
+    where: {
+      result: { not: null },
+    },
+    include: {
+      sport: true,
+      betType: true,
+    },
+  });
+
+  // Group by sport + betType combination
+  const crossStats: Record<string, {
+    sportId: string;
+    sportName: string;
+    betTypeCode: string;
+    betTypeName: string;
+    predictedEdges: number[];
+    realizedEdges: number[];
+    profits: number[];
+    wins: number;
+  }> = {};
+
+  for (const bet of settledBets) {
+    const key = `${bet.sportId}-${bet.betType.code}`;
+
+    if (!crossStats[key]) {
+      crossStats[key] = {
+        sportId: bet.sportId,
+        sportName: bet.sport.name,
+        betTypeCode: bet.betType.code,
+        betTypeName: bet.betType.name,
+        predictedEdges: [],
+        realizedEdges: [],
+        profits: [],
+        wins: 0,
+      };
+    }
+
+    crossStats[key].predictedEdges.push(bet.predictedEdge);
+    crossStats[key].realizedEdges.push(bet.realizedEdge!);
+    crossStats[key].profits.push(bet.profitLoss || 0);
+    if (bet.result === 1) crossStats[key].wins++;
+  }
+
+  const results: SportBetTypeAnalysis[] = [];
+
+  for (const stats of Object.values(crossStats)) {
+    const betCount = stats.predictedEdges.length;
+    if (betCount === 0) continue;
+
+    const avgPredictedEdge = stats.predictedEdges.reduce((a, b) => a + b, 0) / betCount;
+    const avgRealizedEdge = stats.realizedEdges.reduce((a, b) => a + b, 0) / betCount;
+    const totalProfit = stats.profits.reduce((a, b) => a + b, 0);
+
+    results.push({
+      sportId: stats.sportId,
+      sportName: stats.sportName,
+      betTypeCode: stats.betTypeCode,
+      betTypeName: stats.betTypeName,
+      betCount,
+      avgPredictedEdge,
+      avgRealizedEdge,
+      edgeError: avgPredictedEdge - avgRealizedEdge,
+      winRate: stats.wins / betCount,
+      totalProfit,
+    });
+  }
+
+  return results.sort((a, b) => b.betCount - a.betCount);
 }

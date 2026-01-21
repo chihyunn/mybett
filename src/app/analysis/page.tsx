@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import AnalysisTable from '@/components/AnalysisTable';
 import PortfolioSummary from '@/components/PortfolioSummary';
+import MddCard from '@/components/MddCard';
 
 interface Sport {
   id: string;
@@ -40,17 +40,41 @@ interface PortfolioAnalysis {
   totalProfit: number;
 }
 
+interface MaxDrawdownData {
+  maxDrawdown: number;
+  maxDrawdownPercent: number;
+  peakAmount: number;
+  troughAmount: number;
+  recoveryStatus: 'recovered' | 'recovering' | 'none';
+  currentDrawdown: number;
+  currentDrawdownPercent: number;
+}
+
+interface SportBetTypeAnalysis {
+  sportId: string;
+  sportName: string;
+  betTypeCode: string;
+  betTypeName: string;
+  betCount: number;
+  avgPredictedEdge: number;
+  avgRealizedEdge: number;
+  edgeError: number;
+  winRate: number;
+  totalProfit: number;
+}
+
 export default function AnalysisPage() {
-  const router = useRouter();
   const [sports, setSports] = useState<Sport[]>([]);
   const [sportId, setSportId] = useState<string>('');
   const [minBets, setMinBets] = useState<number>(1);
-  const [view, setView] = useState<'team' | 'betType'>('team');
+  const [view, setView] = useState<'team' | 'betType' | 'cross'>('team');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>([]);
   const [betTypeAnalysis, setBetTypeAnalysis] = useState<BetTypeAnalysis[]>([]);
+  const [sportBetTypeAnalysis, setSportBetTypeAnalysis] = useState<SportBetTypeAnalysis[]>([]);
+  const [maxDrawdown, setMaxDrawdown] = useState<MaxDrawdownData | null>(null);
   const [portfolioAnalysis, setPortfolioAnalysis] = useState<PortfolioAnalysis>({
     totalBets: 0,
     avgPredictedEdge: 0,
@@ -90,6 +114,8 @@ export default function AnalysisPage() {
       setTeamAnalysis(data.teamAnalysis);
       setBetTypeAnalysis(data.betTypeAnalysis);
       setPortfolioAnalysis(data.portfolioAnalysis);
+      setMaxDrawdown(data.maxDrawdown);
+      setSportBetTypeAnalysis(data.sportBetTypeAnalysis);
     } catch (err) {
       setError(err instanceof Error ? err.message : '데이터 로딩 실패');
       console.error('Failed to fetch analysis:', err);
@@ -103,44 +129,42 @@ export default function AnalysisPage() {
   }, [fetchAnalysis]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-4 md:py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-blue-600 hover:text-blue-800 text-sm"
-          >
-            ← 대시보드로 돌아가기
-          </button>
-        </div>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">예측 정확도 분석</h1>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">에지 분석</h1>
-
-        {/* Portfolio Summary */}
-        <div className="mb-8">
+        {/* Portfolio Summary + MDD */}
+        <div className="mb-6 md:mb-8">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">전체 포트폴리오</h2>
           {loading ? (
-            <div className="animate-pulse grid grid-cols-6 gap-4">
-              {[...Array(6)].map((_, i) => (
+            <div className="animate-pulse grid grid-cols-2 md:grid-cols-7 gap-4">
+              {[...Array(7)].map((_, i) => (
                 <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
               ))}
             </div>
           ) : (
-            <PortfolioSummary analysis={portfolioAnalysis} />
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+              <div className="col-span-2 md:col-span-6">
+                <PortfolioSummary analysis={portfolioAnalysis} />
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                {maxDrawdown && <MddCard data={maxDrawdown} />}
+              </div>
+            </div>
           )}
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex flex-wrap gap-4 items-end">
+        <div className="bg-white p-4 rounded-lg shadow mb-4 md:mb-6">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                스포츠 필터
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+                스포츠
               </label>
               <select
                 value={sportId}
                 onChange={(e) => setSportId(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
               >
                 <option value="">전체</option>
                 {sports.map((sport) => (
@@ -152,41 +176,54 @@ export default function AnalysisPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                최소 베팅 수
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+                최소 베팅
               </label>
               <select
                 value={minBets}
                 onChange={(e) => setMinBets(parseInt(e.target.value))}
-                className="px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
               >
-                <option value="1">1회 이상</option>
-                <option value="5">5회 이상</option>
-                <option value="10">10회 이상</option>
-                <option value="20">20회 이상</option>
+                <option value="1">1+</option>
+                <option value="5">5+</option>
+                <option value="10">10+</option>
+                <option value="20">20+</option>
               </select>
             </div>
 
-            <div className="flex gap-2">
+            <div className="col-span-2 flex gap-2">
               <button
+                type="button"
                 onClick={() => setView('team')}
-                className={`px-4 py-2 rounded-md font-medium ${
+                className={`flex-1 px-2 py-2 rounded-md text-xs md:text-sm font-medium ${
                   view === 'team'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                팀별 분석
+                팀별
               </button>
               <button
+                type="button"
                 onClick={() => setView('betType')}
-                className={`px-4 py-2 rounded-md font-medium ${
+                className={`flex-1 px-2 py-2 rounded-md text-xs md:text-sm font-medium ${
                   view === 'betType'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                베팅타입별 분석
+                타입별
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('cross')}
+                className={`flex-1 px-2 py-2 rounded-md text-xs md:text-sm font-medium ${
+                  view === 'cross'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                종합
               </button>
             </div>
           </div>
@@ -212,10 +249,13 @@ export default function AnalysisPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-800">
-              {view === 'team' ? '팀별 에지 분석' : '베팅타입별 에지 분석'}
+              {view === 'team' ? '팀별 예측 정확도' : view === 'betType' ? '베팅타입별 예측 정확도' : '스포츠 x 베팅타입 분석'}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              오차 = 평균 Δp - 평균 Δr (양수: 과대평가, 음수: 과소평가)
+              {view === 'cross'
+                ? '스포츠별 베팅타입 조합 성과 분석'
+                : '예측 오차 = 예상 우위 - 실제 결과 (양수: 낙관적 예측, 음수: 보수적 예측)'
+              }
             </p>
           </div>
 
@@ -232,6 +272,8 @@ export default function AnalysisPage() {
                 ))}
               </div>
             </div>
+          ) : view === 'cross' ? (
+            <CrossAnalysisTable data={sportBetTypeAnalysis} />
           ) : (
             <AnalysisTable
               teamAnalysis={teamAnalysis}
@@ -241,6 +283,70 @@ export default function AnalysisPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Cross Analysis Table Component
+function CrossAnalysisTable({ data }: { data: SportBetTypeAnalysis[] }) {
+  if (data.length === 0) {
+    return (
+      <div className="p-8 text-center text-gray-500">
+        분석할 데이터가 없습니다
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-3 text-left font-medium text-gray-600">스포츠</th>
+            <th className="px-4 py-3 text-left font-medium text-gray-600">타입</th>
+            <th className="px-4 py-3 text-center font-medium text-gray-600">베팅수</th>
+            <th className="px-4 py-3 text-center font-medium text-gray-600">승률</th>
+            <th className="px-4 py-3 text-center font-medium text-gray-600">예상 우위</th>
+            <th className="px-4 py-3 text-center font-medium text-gray-600">실제 결과</th>
+            <th className="px-4 py-3 text-center font-medium text-gray-600">오차</th>
+            <th className="px-4 py-3 text-right font-medium text-gray-600">수익</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {data.map((item) => (
+            <tr key={`${item.sportId}-${item.betTypeCode}`} className="hover:bg-gray-50">
+              <td className="px-4 py-3 font-medium">{item.sportName}</td>
+              <td className="px-4 py-3">
+                <span className="px-2 py-1 text-xs bg-gray-100 rounded">
+                  {item.betTypeName}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center">{item.betCount}</td>
+              <td className="px-4 py-3 text-center">
+                <span className={item.winRate >= 0.5 ? 'text-green-600' : 'text-red-600'}>
+                  {(item.winRate * 100).toFixed(0)}%
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center">
+                {(item.avgPredictedEdge * 100).toFixed(1)}%
+              </td>
+              <td className="px-4 py-3 text-center">
+                <span className={item.avgRealizedEdge >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  {(item.avgRealizedEdge * 100).toFixed(1)}%
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center">
+                <span className={item.edgeError > 0 ? 'text-orange-600' : 'text-blue-600'}>
+                  {item.edgeError > 0 ? '+' : ''}{(item.edgeError * 100).toFixed(1)}%
+                </span>
+              </td>
+              <td className={`px-4 py-3 text-right font-medium ${item.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {item.totalProfit >= 0 ? '+' : ''}${item.totalProfit.toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

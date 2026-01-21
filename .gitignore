@@ -37,7 +37,7 @@ yarn-error.log*
 .vercel
 
 # prisma
-*.db
+# *.db  # Commented out to allow SQLite DB in repo for deployment
 *.db-journal
 
 # typescript

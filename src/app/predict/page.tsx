@@ -1,22 +1,33 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import SportSelector from '@/components/SportSelector';
 import TeamSelector from '@/components/TeamSelector';
 import BetTypeSelector from '@/components/BetTypeSelector';
 import ProbabilityInput from '@/components/ProbabilityInput';
 import EdgeDisplay from '@/components/EdgeDisplay';
 import BetRecommendation from '@/components/BetRecommendation';
+import StreakWarningBanner from '@/components/StreakWarningBanner';
 
 interface Team {
   id: string;
   name: string;
 }
 
-export default function PredictPage() {
-  const router = useRouter();
+interface TeamStreak {
+  teamId: string;
+  teamName: string;
+  streak: number;
+}
 
+interface StreakData {
+  globalStreak: number;
+  isGlobalWarning: boolean;
+  teamStreaks: TeamStreak[];
+  warningTeams: TeamStreak[];
+}
+
+export default function PredictPage() {
   // Form state
   const [sportId, setSportId] = useState('');
   const [teamAId, setTeamAId] = useState('');
@@ -33,6 +44,7 @@ export default function PredictPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
 
   // Fetch teams when sport changes
   useEffect(() => {
@@ -57,20 +69,25 @@ export default function PredictPage() {
     fetchTeams();
   }, [sportId]);
 
-  // Fetch current balance
+  // Fetch current balance and streak data
   useEffect(() => {
-    async function fetchBalance() {
+    async function fetchData() {
       try {
-        const res = await fetch('/api/balance');
-        const data = await res.json();
-        setBalance(data.currentAmount);
+        const [balanceRes, streakRes] = await Promise.all([
+          fetch('/api/balance'),
+          fetch('/api/analysis/streak'),
+        ]);
+        const balanceData = await balanceRes.json();
+        const streakDataRes = await streakRes.json();
+        setBalance(balanceData.currentAmount);
+        setStreakData(streakDataRes);
       } catch (err) {
-        console.error('Failed to fetch balance:', err);
+        console.error('Failed to fetch data:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchBalance();
+    fetchData();
   }, []);
 
   // Parse probabilities
@@ -87,6 +104,22 @@ export default function PredictPage() {
   // Get team names
   const teamAName = teams.find((t) => t.id === teamAId)?.name;
   const teamBName = teams.find((t) => t.id === teamBId)?.name;
+
+  // Get streak warning for selected team
+  const streakWarning = useMemo(() => {
+    if (!streakData) return undefined;
+
+    const selectedTeamId = selectedTeam === 'A' ? teamAId : selectedTeam === 'B' ? teamBId : '';
+    const selectedTeamName = selectedTeam === 'A' ? teamAName : teamBName;
+
+    const teamStreakData = streakData.teamStreaks.find((t) => t.teamId === selectedTeamId);
+
+    return {
+      globalStreak: streakData.globalStreak,
+      teamStreak: teamStreakData?.streak,
+      teamName: selectedTeamName,
+    };
+  }, [streakData, selectedTeam, teamAId, teamBId, teamAName, teamBName]);
 
   // Form validation
   const isValid = useMemo(() => {
@@ -165,13 +198,12 @@ export default function PredictPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="py-4 md:py-8">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="animate-pulse space-y-6">
-            <div className="h-4 bg-gray-200 rounded w-32"></div>
-            <div className="h-8 bg-gray-200 rounded w-48"></div>
-            <div className="h-40 bg-gray-200 rounded-lg"></div>
-            <div className="h-40 bg-gray-200 rounded-lg"></div>
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-32"></div>
+            <div className="h-32 bg-gray-200 rounded-lg"></div>
+            <div className="h-32 bg-gray-200 rounded-lg"></div>
           </div>
         </div>
       </div>
@@ -179,18 +211,11 @@ export default function PredictPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-blue-600 hover:text-blue-800 text-sm"
-          >
-            ← 대시보드로 돌아가기
-          </button>
-        </div>
-
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">예측 입력</h1>
+    <>
+      <StreakWarningBanner />
+      <div className={`py-4 md:py-8 ${streakData?.isGlobalWarning ? 'pt-16' : ''}`}>
+        <div className="max-w-2xl mx-auto px-4">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">예측 입력</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Sport Selection */}
@@ -253,6 +278,7 @@ export default function PredictPage() {
                 pAgent={parsedPAgent}
                 pMarket={parsedPMarket}
                 balance={balance}
+                streakWarning={streakWarning}
               />
             </div>
           )}
@@ -288,8 +314,9 @@ export default function PredictPage() {
               초기화
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

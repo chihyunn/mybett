@@ -37,9 +37,9 @@ export default function AnalysisTable({ teamAnalysis, betTypeAnalysis, view }: A
   };
 
   const getErrorLabel = (error: number) => {
-    if (error > 0.02) return '과대평가';
-    if (error < -0.02) return '과소평가';
-    return '적정';
+    if (error > 0.02) return '낙관적 예측';
+    if (error < -0.02) return '보수적 예측';
+    return '정확함';
   };
 
   if (view === 'team') {
@@ -58,9 +58,9 @@ export default function AnalysisTable({ teamAnalysis, betTypeAnalysis, view }: A
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">팀</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">베팅수</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">평균 Δp</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">평균 Δr</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">오차</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">예상 우위</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">실제 결과</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">예측 오차</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">승률</th>
             </tr>
           </thead>
@@ -117,9 +117,9 @@ export default function AnalysisTable({ teamAnalysis, betTypeAnalysis, view }: A
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">베팅 타입</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">베팅수</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">평균 Δp</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">평균 Δr</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">오차</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">예상 우위</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">실제 결과</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">예측 오차</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">승률</th>
           </tr>
         </thead>

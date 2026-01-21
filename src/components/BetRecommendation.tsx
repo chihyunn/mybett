@@ -4,16 +4,24 @@ import { useState } from 'react';
 import { recommendBetAmount, getRecommendationMessage, calculateKellyBetAmounts } from '@/lib/betting';
 import { calculatePredictedEdge } from '@/lib/edge';
 
+interface StreakWarning {
+  globalStreak: number;
+  teamStreak?: number;
+  teamName?: string;
+}
+
 interface BetRecommendationProps {
   pAgent: number | null;
   pMarket: number | null;
   balance: number;
+  streakWarning?: StreakWarning;
 }
 
 export default function BetRecommendation({
   pAgent,
   pMarket,
   balance,
+  streakWarning,
 }: BetRecommendationProps) {
   const [mode, setMode] = useState<'fixed' | 'kelly'>('fixed');
 
@@ -28,15 +36,35 @@ export default function BetRecommendation({
   }
 
   const edge = calculatePredictedEdge(pAgent, pMarket);
-  const recommended = recommendBetAmount(edge, balance);
+
+  // Calculate streak penalty
+  let streakPenalty = 0;
+  let streakMessage = '';
+
+  if (streakWarning) {
+    // Global losing streak: -2% penalty
+    if (streakWarning.globalStreak <= -3) {
+      streakPenalty += 0.02;
+      streakMessage = `🔥 ${Math.abs(streakWarning.globalStreak)}연패 중 (-2%)`;
+    }
+    // Team losing streak: additional -1% penalty
+    if (streakWarning.teamStreak && streakWarning.teamStreak <= -3) {
+      streakPenalty += 0.01;
+      streakMessage += streakMessage ? ' + ' : '';
+      streakMessage += `${streakWarning.teamName} ${Math.abs(streakWarning.teamStreak)}연패 (-1%)`;
+    }
+  }
+
+  // Apply penalty to balance for calculation (effectively reducing bet size)
+  const adjustedBalance = balance * (1 - streakPenalty / 0.04); // Scale penalty
+
+  const recommended = recommendBetAmount(edge, adjustedBalance);
+  const originalRecommended = recommendBetAmount(edge, balance);
   const message = getRecommendationMessage(edge);
-  const kelly = calculateKellyBetAmounts(pAgent, pMarket, balance);
+  const kelly = calculateKellyBetAmounts(pAgent, pMarket, adjustedBalance);
 
-  const isRecommended = edge > 0;
-
-  // Check if balance limited the recommendation
-  const baseRecommendation = edge >= 0.10 ? 350 : edge >= 0.05 ? 200 : 0;
-  const isBalanceLimited = recommended !== null && recommended < baseRecommendation;
+  const isRecommended = edge >= 0;
+  const hasStreakPenalty = streakPenalty > 0;
 
   return (
     <div
@@ -51,6 +79,7 @@ export default function BetRecommendation({
       {/* Mode Toggle */}
       <div className="flex justify-center gap-1 mb-3">
         <button
+          type="button"
           onClick={() => setMode('fixed')}
           className={`px-2 py-1 text-xs rounded ${
             mode === 'fixed'
@@ -61,6 +90,7 @@ export default function BetRecommendation({
           고정 금액
         </button>
         <button
+          type="button"
           onClick={() => setMode('kelly')}
           className={`px-2 py-1 text-xs rounded ${
             mode === 'kelly'
@@ -77,15 +107,18 @@ export default function BetRecommendation({
           // Fixed Amount Mode
           <>
             <div className="text-sm font-medium mb-1">베팅 추천</div>
-            {recommended !== null && recommended > 0 ? (
+            {recommended !== null ? (
               <>
                 <div className="text-3xl font-bold text-blue-600">
                   ${recommended.toLocaleString()}
                 </div>
                 <div className="text-sm mt-1 text-blue-700">{message}</div>
-                {isBalanceLimited && (
-                  <div className="text-xs mt-2 text-orange-600">
-                    ⚠️ 밸런스 제한
+                {hasStreakPenalty && originalRecommended && (
+                  <div className="mt-2 p-2 bg-orange-100 rounded text-xs text-orange-700">
+                    <div className="font-medium">{streakMessage}</div>
+                    <div className="text-orange-500">
+                      원래: ${originalRecommended.toLocaleString()} → 조정: ${recommended.toLocaleString()}
+                    </div>
                   </div>
                 )}
               </>

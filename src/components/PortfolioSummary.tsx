@@ -19,9 +19,9 @@ export default function PortfolioSummary({ analysis }: PortfolioSummaryProps) {
   const { totalBets, avgPredictedEdge, avgRealizedEdge, edgeError, winRate, totalProfit } = analysis;
 
   const getErrorStatus = () => {
-    if (Math.abs(edgeError) < 0.02) return { text: '적정', color: 'text-green-600', bg: 'bg-green-50' };
-    if (edgeError > 0) return { text: '과대평가', color: 'text-orange-600', bg: 'bg-orange-50' };
-    return { text: '과소평가', color: 'text-blue-600', bg: 'bg-blue-50' };
+    if (Math.abs(edgeError) < 0.02) return { text: '정확함', color: 'text-green-600', bg: 'bg-green-50' };
+    if (edgeError > 0) return { text: '낙관적 예측', color: 'text-orange-600', bg: 'bg-orange-50' };
+    return { text: '보수적 예측', color: 'text-blue-600', bg: 'bg-blue-50' };
   };
 
   const errorStatus = getErrorStatus();
@@ -52,7 +52,7 @@ export default function PortfolioSummary({ analysis }: PortfolioSummaryProps) {
 
       {/* Avg Predicted Edge */}
       <div className="p-4 bg-white rounded-lg shadow">
-        <div className="text-sm text-gray-500 mb-1">평균 Δp</div>
+        <div className="text-sm text-gray-500 mb-1">예상 우위</div>
         <div className="text-2xl font-bold text-gray-900">
           {formatEdgePercent(avgPredictedEdge)}
         </div>
@@ -60,7 +60,7 @@ export default function PortfolioSummary({ analysis }: PortfolioSummaryProps) {
 
       {/* Avg Realized Edge */}
       <div className="p-4 bg-white rounded-lg shadow">
-        <div className="text-sm text-gray-500 mb-1">평균 Δr</div>
+        <div className="text-sm text-gray-500 mb-1">실제 결과</div>
         <div className={`text-2xl font-bold ${avgRealizedEdge >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {formatEdgePercent(avgRealizedEdge)}
         </div>
@@ -68,7 +68,7 @@ export default function PortfolioSummary({ analysis }: PortfolioSummaryProps) {
 
       {/* Edge Error */}
       <div className={`p-4 rounded-lg shadow ${errorStatus.bg}`}>
-        <div className="text-sm text-gray-500 mb-1">오차 (Δp - Δr)</div>
+        <div className="text-sm text-gray-500 mb-1">예측 오차</div>
         <div className={`text-2xl font-bold ${errorStatus.color}`}>
           {formatEdgePercent(edgeError)}
         </div>

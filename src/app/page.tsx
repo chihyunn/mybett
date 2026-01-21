@@ -33,30 +33,39 @@ interface BalanceHistoryItem {
   createdAt: string;
 }
 
+interface StreakData {
+  globalStreak: number;
+  isGlobalWarning: boolean;
+}
+
 export default function DashboardPage() {
   const [balance, setBalance] = useState<Balance | null>(null);
   const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   const [balanceHistory, setBalanceHistory] = useState<BalanceHistoryItem[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [balanceRes, betsRes, historyRes] = await Promise.all([
+        const [balanceRes, betsRes, historyRes, streakRes] = await Promise.all([
           fetch('/api/balance'),
           fetch('/api/bets'),
           fetch('/api/balance/history'),
+          fetch('/api/analysis/streak'),
         ]);
 
         const balanceData = await balanceRes.json();
         const betsData = await betsRes.json();
         const historyData = await historyRes.json();
+        const streakDataRes = await streakRes.json();
 
         setBalance(balanceData);
         setRecentBets(betsData.slice(0, 5));
         setBalanceHistory(historyData);
         setPendingCount(betsData.filter((b: RecentBet) => b.result === null).length);
+        setStreakData(streakDataRes);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -68,13 +77,13 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="py-4 md:py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 rounded w-48"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                <div key={i} className="h-28 md:h-32 bg-gray-200 rounded-lg"></div>
               ))}
             </div>
           </div>
@@ -84,17 +93,29 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-4 md:py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Sports Quant Dashboard</h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">대시보드</h1>
+              {streakData && streakData.globalStreak >= 3 && (
+                <span className="px-3 py-1 text-sm font-bold bg-blue-500 text-white rounded-full animate-pulse">
+                  🔥 {streakData.globalStreak}연승
+                </span>
+              )}
+              {streakData && streakData.globalStreak <= -3 && (
+                <span className="px-3 py-1 text-sm font-bold bg-red-500 text-white rounded-full animate-pulse">
+                  ⚠️ {Math.abs(streakData.globalStreak)}연패
+                </span>
+              )}
+            </div>
             <p className="text-gray-500 text-sm">에이전트 vs 시장 확률 분석</p>
           </div>
           <Link
             href="/predict"
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+            className="px-3 py-2 md:px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
           >
             + 새 예측
           </Link>

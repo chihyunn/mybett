@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import BetHistoryTable from '@/components/BetHistoryTable';
 import ResultInput from '@/components/ResultInput';
 
@@ -25,7 +25,6 @@ interface Bet {
 }
 
 export default function HistoryPage() {
-  const router = useRouter();
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,29 +94,20 @@ export default function HistoryPage() {
   const settledCount = bets.filter((b) => b.result !== null).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-4 md:py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-blue-600 hover:text-blue-800 text-sm"
-          >
-            ← 대시보드로 돌아가기
-          </button>
-        </div>
-
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">베팅 기록</h1>
-          <button
-            onClick={() => router.push('/predict')}
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">베팅 기록</h1>
+          <Link
+            href="/predict"
+            className="px-3 py-2 md:px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
           >
             + 새 예측
-          </button>
+          </Link>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4 md:mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${

@@ -3,6 +3,8 @@ import {
   getTeamAnalysis,
   getBetTypeAnalysis,
   getPortfolioAnalysis,
+  getMaxDrawdown,
+  getSportBetTypeAnalysis,
 } from '@/lib/analysis';
 
 export async function GET(request: Request) {
@@ -11,16 +13,20 @@ export async function GET(request: Request) {
     const sportId = searchParams.get('sportId') || undefined;
     const minBets = parseInt(searchParams.get('minBets') || '1');
 
-    const [teamAnalysis, betTypeAnalysis, portfolioAnalysis] = await Promise.all([
+    const [teamAnalysis, betTypeAnalysis, portfolioAnalysis, maxDrawdown, sportBetTypeAnalysis] = await Promise.all([
       getTeamAnalysis(sportId, minBets),
       getBetTypeAnalysis(sportId),
       getPortfolioAnalysis(sportId),
+      getMaxDrawdown(),
+      getSportBetTypeAnalysis(),
     ]);
 
     return NextResponse.json({
       teamAnalysis,
       betTypeAnalysis,
       portfolioAnalysis,
+      maxDrawdown,
+      sportBetTypeAnalysis,
     });
   } catch (error) {
     console.error('Failed to fetch analysis:', error);

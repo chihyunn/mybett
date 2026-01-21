@@ -8,106 +8,144 @@ import {
 } from '@/lib/betting';
 
 describe('recommendBetAmount', () => {
+  const balance = 10000; // Use $10,000 for easy percentage calculation
+
   describe('edge thresholds', () => {
-    it('should return null for edge < 5%', () => {
-      expect(recommendBetAmount(0.04, 5000)).toBeNull();
-      expect(recommendBetAmount(0.03, 5000)).toBeNull();
-      expect(recommendBetAmount(0, 5000)).toBeNull();
-      expect(recommendBetAmount(-0.05, 5000)).toBeNull();
+    it('should return null for negative edge', () => {
+      expect(recommendBetAmount(-0.05, balance)).toBeNull();
+      expect(recommendBetAmount(-0.01, balance)).toBeNull();
     });
 
-    it('should return $200 for edge 5-10%', () => {
-      expect(recommendBetAmount(0.05, 5000)).toBe(200);
-      expect(recommendBetAmount(0.07, 5000)).toBe(200);
-      expect(recommendBetAmount(0.09, 5000)).toBe(200);
-      expect(recommendBetAmount(0.099, 5000)).toBe(200);
+    it('should return 1% of balance for edge 0-14%', () => {
+      // 1% of 10000 = 100
+      expect(recommendBetAmount(0, balance)).toBe(100);
+      expect(recommendBetAmount(0.05, balance)).toBe(100);
+      expect(recommendBetAmount(0.10, balance)).toBe(100);
+      expect(recommendBetAmount(0.14, balance)).toBe(100);
     });
 
-    it('should return $350 for edge >= 10%', () => {
-      expect(recommendBetAmount(0.10, 5000)).toBe(350);
-      expect(recommendBetAmount(0.12, 5000)).toBe(350);
-      expect(recommendBetAmount(0.20, 5000)).toBe(350);
-      expect(recommendBetAmount(0.50, 5000)).toBe(350);
+    it('should return 2% of balance for edge 15-24%', () => {
+      // 2% of 10000 = 200
+      expect(recommendBetAmount(0.15, balance)).toBe(200);
+      expect(recommendBetAmount(0.20, balance)).toBe(200);
+      expect(recommendBetAmount(0.24, balance)).toBe(200);
+    });
+
+    it('should return 3% of balance for edge 25-30%', () => {
+      // 3% of 10000 = 300
+      expect(recommendBetAmount(0.25, balance)).toBe(300);
+      expect(recommendBetAmount(0.28, balance)).toBe(300);
+      expect(recommendBetAmount(0.30, balance)).toBe(300);
+    });
+
+    it('should return 4% of balance for edge 31%+', () => {
+      // 4% of 10000 = 400
+      expect(recommendBetAmount(0.31, balance)).toBe(400);
+      expect(recommendBetAmount(0.35, balance)).toBe(400);
+      expect(recommendBetAmount(0.50, balance)).toBe(400);
     });
   });
 
-  describe('balance awareness', () => {
-    it('should return available balance when lower than recommended', () => {
-      // Edge 7% would recommend $200, but balance is only $150
-      expect(recommendBetAmount(0.07, 150)).toBe(150);
+  describe('balance scaling', () => {
+    it('should scale with different balances', () => {
+      // Edge 10% = 1% tier
+      expect(recommendBetAmount(0.10, 5000)).toBe(50);   // 1% of 5000
+      expect(recommendBetAmount(0.10, 20000)).toBe(200); // 1% of 20000
 
-      // Edge 12% would recommend $350, but balance is only $200
-      expect(recommendBetAmount(0.12, 200)).toBe(200);
-    });
-
-    it('should return full recommendation when balance is sufficient', () => {
-      expect(recommendBetAmount(0.07, 200)).toBe(200);
-      expect(recommendBetAmount(0.12, 350)).toBe(350);
-      expect(recommendBetAmount(0.12, 1000)).toBe(350);
+      // Edge 20% = 2% tier
+      expect(recommendBetAmount(0.20, 5000)).toBe(100);  // 2% of 5000
+      expect(recommendBetAmount(0.20, 20000)).toBe(400); // 2% of 20000
     });
 
     it('should handle zero balance', () => {
       expect(recommendBetAmount(0.10, 0)).toBe(0);
+      expect(recommendBetAmount(0.30, 0)).toBe(0);
     });
 
-    it('should handle very small balance', () => {
-      expect(recommendBetAmount(0.10, 50)).toBe(50);
+    it('should handle small balance', () => {
+      expect(recommendBetAmount(0.10, 100)).toBe(1);  // 1% of 100
+      expect(recommendBetAmount(0.35, 100)).toBe(4);  // 4% of 100
     });
   });
 
   describe('edge boundary cases', () => {
-    it('should handle exactly 5% edge', () => {
-      expect(recommendBetAmount(0.05, 5000)).toBe(200);
+    it('should handle boundary at 15%', () => {
+      expect(recommendBetAmount(0.149, balance)).toBe(100);  // 1%
+      expect(recommendBetAmount(0.15, balance)).toBe(200);   // 2%
     });
 
-    it('should handle exactly 10% edge', () => {
-      expect(recommendBetAmount(0.10, 5000)).toBe(350);
+    it('should handle boundary at 25%', () => {
+      expect(recommendBetAmount(0.249, balance)).toBe(200);  // 2%
+      expect(recommendBetAmount(0.25, balance)).toBe(300);   // 3%
     });
 
-    it('should handle edge just below thresholds', () => {
-      expect(recommendBetAmount(0.0499, 5000)).toBeNull();
-      expect(recommendBetAmount(0.0999, 5000)).toBe(200);
+    it('should handle boundary at 31%', () => {
+      expect(recommendBetAmount(0.309, balance)).toBe(300);  // 3%
+      expect(recommendBetAmount(0.31, balance)).toBe(400);   // 4%
     });
   });
 });
 
 describe('getRecommendationMessage', () => {
-  it('should return strong no-bet message for negative edge', () => {
-    expect(getRecommendationMessage(-0.05)).toBe('베팅 강력 비추천 (음수 Edge)');
-    expect(getRecommendationMessage(-0.10)).toBe('베팅 강력 비추천 (음수 Edge)');
+  it('should return no-bet message for negative edge', () => {
+    expect(getRecommendationMessage(-0.05)).toBe('베팅 비추천 (음수 Edge)');
+    expect(getRecommendationMessage(-0.10)).toBe('베팅 비추천 (음수 Edge)');
   });
 
-  it('should return no-bet message for edge < 5%', () => {
-    expect(getRecommendationMessage(0)).toBe('베팅 비추천 (Edge < 5%)');
-    expect(getRecommendationMessage(0.04)).toBe('베팅 비추천 (Edge < 5%)');
+  it('should return 1% recommendation for edge 0-14%', () => {
+    expect(getRecommendationMessage(0)).toBe('베팅 추천 (1% of balance)');
+    expect(getRecommendationMessage(0.10)).toBe('베팅 추천 (1% of balance)');
+    expect(getRecommendationMessage(0.14)).toBe('베팅 추천 (1% of balance)');
   });
 
-  it('should return $200 recommendation for edge 5-10%', () => {
-    expect(getRecommendationMessage(0.05)).toBe('베팅 추천 ($200)');
-    expect(getRecommendationMessage(0.07)).toBe('베팅 추천 ($200)');
-    expect(getRecommendationMessage(0.09)).toBe('베팅 추천 ($200)');
+  it('should return 2% recommendation for edge 15-24%', () => {
+    expect(getRecommendationMessage(0.15)).toBe('베팅 추천 (2% of balance)');
+    expect(getRecommendationMessage(0.20)).toBe('베팅 추천 (2% of balance)');
   });
 
-  it('should return $350 recommendation for edge >= 10%', () => {
-    expect(getRecommendationMessage(0.10)).toBe('베팅 강력 추천 ($350)');
-    expect(getRecommendationMessage(0.15)).toBe('베팅 강력 추천 ($350)');
+  it('should return 3% recommendation for edge 25-30%', () => {
+    expect(getRecommendationMessage(0.25)).toBe('강력 추천 (3% of balance)');
+    expect(getRecommendationMessage(0.30)).toBe('강력 추천 (3% of balance)');
+  });
+
+  it('should return 4% recommendation for edge 31%+', () => {
+    expect(getRecommendationMessage(0.31)).toBe('최강 추천 (4% of balance)');
+    expect(getRecommendationMessage(0.50)).toBe('최강 추천 (4% of balance)');
   });
 });
 
 describe('calculateProfitLoss', () => {
-  it('should return positive profit on win', () => {
-    expect(calculateProfitLoss(1, 200)).toBe(200);
-    expect(calculateProfitLoss(1, 350)).toBe(350);
+  it('should calculate profit based on market odds when winning', () => {
+    // pMarket = 0.50 (odds = 2.0): $100 bet wins → +$100
+    expect(calculateProfitLoss(1, 100, 0.50)).toBe(100);
+
+    // pMarket = 0.40 (odds = 2.5): $100 bet wins → +$150
+    expect(calculateProfitLoss(1, 100, 0.40)).toBe(150);
+
+    // pMarket = 0.60 (odds = 1.67): $100 bet wins → +$67
+    expect(calculateProfitLoss(1, 100, 0.60)).toBe(67);
+
+    // pMarket = 0.25 (odds = 4.0): $100 bet wins → +$300
+    expect(calculateProfitLoss(1, 100, 0.25)).toBe(300);
   });
 
-  it('should return negative loss on loss', () => {
-    expect(calculateProfitLoss(0, 200)).toBe(-200);
-    expect(calculateProfitLoss(0, 350)).toBe(-350);
+  it('should return negative loss on loss (regardless of odds)', () => {
+    expect(calculateProfitLoss(0, 200, 0.50)).toBe(-200);
+    expect(calculateProfitLoss(0, 350, 0.40)).toBe(-350);
+    expect(calculateProfitLoss(0, 100, 0.60)).toBe(-100);
   });
 
   it('should handle zero amount', () => {
-    expect(calculateProfitLoss(1, 0)).toBe(0);
-    expect(calculateProfitLoss(0, 0)).toBeCloseTo(0);
+    expect(calculateProfitLoss(1, 0, 0.50)).toBe(0);
+    expect(calculateProfitLoss(0, 0, 0.50)).toBeCloseTo(0);
+  });
+
+  it('should handle various bet amounts with different odds', () => {
+    // $200 bet at odds 2.5 (pMarket = 0.40) → +$300
+    expect(calculateProfitLoss(1, 200, 0.40)).toBe(300);
+
+    // $350 bet at odds 1.5 (pMarket = 0.667) → +$175
+    expect(calculateProfitLoss(1, 350, 0.667)).toBe(175);
   });
 });
 

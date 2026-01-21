@@ -53,7 +53,7 @@ export async function PATCH(
 
     // Calculate realized edge and profit/loss
     const realizedEdge = calculateRealizedEdge(result, existingBet.pMarket);
-    const profitLoss = calculateProfitLoss(result, actualAmount);
+    const profitLoss = calculateProfitLoss(result, actualAmount, existingBet.pMarket);
 
     // Update bet with result
     const updatedBet = await prisma.bet.update({

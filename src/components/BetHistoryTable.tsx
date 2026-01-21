@@ -62,8 +62,8 @@ export default function BetHistoryTable({ bets, onResultInput, onDelete }: BetHi
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">매치업</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">베팅</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Δp</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Δr</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">예상 우위</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">실제 결과</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">결과</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">손익</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">액션</th>

@@ -60,33 +60,38 @@ export function calculateKellyBetAmounts(
  * Recommend bet amount based on edge and available balance
  * @param edge - Predicted edge as decimal (e.g., 0.10 = 10%)
  * @param balance - Current available balance
- * @returns Recommended bet amount, or null if edge is too low
+ * @returns Recommended bet amount, or null if edge is negative
  *
- * Edge thresholds:
- * - < 5%: No bet recommended
- * - 5-10%: $200 recommended
- * - 10%+: $350 recommended
- *
- * If balance is lower than recommended amount, returns available balance
+ * Edge thresholds (percentage of balance):
+ * - < 0%: No bet recommended (negative edge)
+ * - 0-14%: 1% of balance
+ * - 15-24%: 2% of balance
+ * - 25-30%: 3% of balance
+ * - 31%+: 4% of balance (max)
  */
 export function recommendBetAmount(edge: number, balance: number): number | null {
-  // Edge < 5% - no bet recommended
-  if (edge < 0.05) {
+  // Negative edge - no bet recommended
+  if (edge < 0) {
     return null;
   }
 
-  let recommended: number;
+  let percent: number;
 
-  if (edge < 0.10) {
-    // Edge 5-10%: $200
-    recommended = 200;
+  if (edge < 0.15) {
+    // Edge 0-14%: 1% of balance
+    percent = 0.01;
+  } else if (edge < 0.25) {
+    // Edge 15-24%: 2% of balance
+    percent = 0.02;
+  } else if (edge < 0.31) {
+    // Edge 25-30%: 3% of balance
+    percent = 0.03;
   } else {
-    // Edge 10%+: $350
-    recommended = 350;
+    // Edge 31%+: 4% of balance (max)
+    percent = 0.04;
   }
 
-  // Return minimum of recommended and available balance
-  return Math.min(recommended, balance);
+  return Math.round(balance * percent);
 }
 
 /**
@@ -96,23 +101,42 @@ export function recommendBetAmount(edge: number, balance: number): number | null
  */
 export function getRecommendationMessage(edge: number): string {
   if (edge < 0) {
-    return '베팅 강력 비추천 (음수 Edge)';
+    return '베팅 비추천 (음수 Edge)';
   }
-  if (edge < 0.05) {
-    return '베팅 비추천 (Edge < 5%)';
+  if (edge < 0.15) {
+    return '베팅 추천 (1% of balance)';
   }
-  if (edge < 0.10) {
-    return '베팅 추천 ($200)';
+  if (edge < 0.25) {
+    return '베팅 추천 (2% of balance)';
   }
-  return '베팅 강력 추천 ($350)';
+  if (edge < 0.31) {
+    return '강력 추천 (3% of balance)';
+  }
+  return '최강 추천 (4% of balance)';
 }
 
 /**
- * Calculate profit/loss from a bet result
+ * Calculate profit/loss from a bet result based on market odds
  * @param result - 1 for win, 0 for loss
  * @param actualAmount - Actual bet amount
+ * @param pMarket - Market implied probability (used to derive odds)
  * @returns Profit (positive) or loss (negative)
+ *
+ * Formula:
+ * - Odds = 1 / pMarket
+ * - Win: profit = actualAmount × (odds - 1)
+ * - Loss: profit = -actualAmount
+ *
+ * Example:
+ * - pMarket = 0.40 (odds = 2.5): $100 bet wins → +$150
+ * - pMarket = 0.60 (odds = 1.67): $100 bet wins → +$67
  */
-export function calculateProfitLoss(result: 0 | 1, actualAmount: number): number {
-  return result === 1 ? actualAmount : -actualAmount;
+export function calculateProfitLoss(result: 0 | 1, actualAmount: number, pMarket: number): number {
+  if (result === 1) {
+    // Win: calculate based on market odds
+    const odds = 1 / pMarket;
+    return Math.round(actualAmount * (odds - 1));
+  }
+  // Loss: lose entire bet amount
+  return -actualAmount;
 }
