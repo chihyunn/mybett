@@ -8,6 +8,7 @@ import ProbabilityInput from '@/components/ProbabilityInput';
 import EdgeDisplay from '@/components/EdgeDisplay';
 import BetRecommendation from '@/components/BetRecommendation';
 import StreakWarningBanner from '@/components/StreakWarningBanner';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Team {
   id: string;
@@ -28,6 +29,8 @@ interface StreakData {
 }
 
 export default function PredictPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   // Form state
   const [sportId, setSportId] = useState('');
   const [teamAId, setTeamAId] = useState('');
@@ -201,9 +204,9 @@ export default function PredictPage() {
       <div className="py-4 md:py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-32"></div>
-            <div className="h-32 bg-gray-200 rounded-lg"></div>
-            <div className="h-32 bg-gray-200 rounded-lg"></div>
+            <div className="h-8 rounded w-32" style={{ background: 'var(--card-border)' }}></div>
+            <div className="h-32 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
+            <div className="h-32 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
           </div>
         </div>
       </div>
@@ -215,11 +218,14 @@ export default function PredictPage() {
       <StreakWarningBanner />
       <div className={`py-4 md:py-8 ${streakData?.isGlobalWarning ? 'pt-16' : ''}`}>
         <div className="max-w-2xl mx-auto px-4">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">예측 입력</h1>
+          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6" style={{ color: 'var(--foreground)' }}>예측 입력</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Sport Selection */}
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            className="p-4 rounded-lg shadow"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+          >
             <SportSelector
               value={sportId}
               onChange={setSportId}
@@ -228,8 +234,11 @@ export default function PredictPage() {
           </div>
 
           {/* Team Selection */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-medium mb-3">매치업 선택</h2>
+          <div
+            className="p-4 rounded-lg shadow"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+          >
+            <h2 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>매치업 선택</h2>
             <TeamSelector
               sportId={sportId}
               teamAId={teamAId}
@@ -242,8 +251,11 @@ export default function PredictPage() {
 
           {/* Bet Type Selection */}
           {teamAId && teamBId && teamAId !== teamBId && (
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-lg font-medium mb-3">베팅 설정</h2>
+            <div
+              className="p-4 rounded-lg shadow"
+              style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+            >
+              <h2 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>베팅 설정</h2>
               <BetTypeSelector
                 betTypeId={betTypeId}
                 selectedTeam={selectedTeam}
@@ -258,8 +270,11 @@ export default function PredictPage() {
 
           {/* Probability Input */}
           {betTypeId && selectedTeam && (
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-lg font-medium mb-3">확률 입력</h2>
+            <div
+              className="p-4 rounded-lg shadow"
+              style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+            >
+              <h2 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>확률 입력</h2>
               <ProbabilityInput
                 pAgent={pAgent}
                 pMarket={pMarket}
@@ -285,13 +300,27 @@ export default function PredictPage() {
 
           {/* Error/Success Messages */}
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <div
+              className="p-4 rounded-lg"
+              style={{
+                background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+                border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca'}`,
+                color: isDark ? '#f87171' : '#b91c1c',
+              }}
+            >
               {error}
             </div>
           )}
 
           {success && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            <div
+              className="p-4 rounded-lg"
+              style={{
+                background: isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
+                border: `1px solid ${isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0'}`,
+                color: isDark ? '#4ade80' : '#15803d',
+              }}
+            >
               {success}
             </div>
           )}
@@ -301,7 +330,11 @@ export default function PredictPage() {
             <button
               type="submit"
               disabled={!isValid || submitting}
-              className="flex-1 py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:cursor-not-allowed transition-colors"
+              style={{
+                opacity: !isValid || submitting ? 0.5 : 1,
+                background: !isValid || submitting ? (isDark ? '#374151' : '#d1d5db') : undefined,
+              }}
             >
               {submitting ? '처리 중...' : '베팅 기록 저장'}
             </button>
@@ -309,7 +342,11 @@ export default function PredictPage() {
               type="button"
               onClick={handleReset}
               disabled={submitting}
-              className="py-3 px-6 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
+              className="py-3 px-6 font-medium rounded-lg disabled:opacity-50 transition-colors"
+              style={{
+                background: isDark ? '#374151' : '#e5e7eb',
+                color: isDark ? '#d1d5db' : '#374151',
+              }}
             >
               초기화
             </button>

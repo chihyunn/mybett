@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Team {
   id: string;
@@ -24,6 +25,7 @@ interface SearchableSelectProps {
   placeholder: string;
   label: string;
   disabled?: boolean;
+  isDark: boolean;
 }
 
 function SearchableSelect({
@@ -34,6 +36,7 @@ function SearchableSelect({
   placeholder,
   label,
   disabled,
+  isDark,
 }: SearchableSelectProps) {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -54,51 +57,63 @@ function SearchableSelect({
 
   return (
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
         {label}
       </label>
       <div
-        className={`
-          w-full px-3 py-2 border rounded-lg cursor-pointer transition-all
-          ${isOpen ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'}
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:border-gray-400'}
-        `}
+        className="w-full px-3 py-2 rounded-lg cursor-pointer transition-all"
+        style={{
+          background: disabled ? (isDark ? '#1f2937' : '#f3f4f6') : 'var(--card-bg)',
+          border: `1px solid ${isOpen ? '#3b82f6' : 'var(--card-border)'}`,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}
         onClick={() => !disabled && setIsOpen(!isOpen)}
       >
         {selectedTeam ? (
           <div className="flex items-center justify-between">
-            <span className="font-medium">{selectedTeam.name}</span>
+            <span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedTeam.name}</span>
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onChange('');
               }}
-              className="text-gray-400 hover:text-gray-600"
+              style={{ color: 'var(--muted)' }}
             >
               ✕
             </button>
           </div>
         ) : (
-          <span className="text-gray-400">{placeholder}</span>
+          <span style={{ color: 'var(--muted)' }}>{placeholder}</span>
         )}
       </div>
 
       {isOpen && !disabled && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-hidden">
-          <div className="p-2 border-b">
+        <div
+          className="absolute z-10 w-full mt-1 rounded-lg shadow-lg max-h-60 overflow-hidden"
+          style={{
+            background: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
+          }}
+        >
+          <div className="p-2" style={{ borderBottom: '1px solid var(--card-border)' }}>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="팀 검색..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+              style={{
+                background: 'var(--card-bg)',
+                border: '1px solid var(--card-border)',
+                color: 'var(--foreground)',
+              }}
               autoFocus
             />
           </div>
           <div className="overflow-y-auto max-h-48">
             {filteredTeams.length === 0 ? (
-              <div className="p-3 text-sm text-gray-500 text-center">
+              <div className="p-3 text-sm text-center" style={{ color: 'var(--muted)' }}>
                 검색 결과 없음
               </div>
             ) : (
@@ -107,7 +122,17 @@ function SearchableSelect({
                   key={team.id}
                   type="button"
                   onClick={() => handleSelect(team.id)}
-                  className="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors text-sm"
+                  className="w-full px-4 py-2 text-left transition-colors text-sm"
+                  style={{
+                    color: 'var(--foreground)',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = isDark ? 'rgba(59, 130, 246, 0.2)' : '#eff6ff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
                 >
                   {team.name}
                 </button>
@@ -135,6 +160,8 @@ export default function TeamSelector({
   onTeamBChange,
   disabled,
 }: TeamSelectorProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -169,8 +196,11 @@ export default function TeamSelector({
 
   if (!sportId) {
     return (
-      <div className="text-gray-500 text-sm p-6 bg-gray-50 rounded-xl text-center">
-        👆 먼저 스포츠를 선택하세요
+      <div
+        className="text-sm p-6 rounded-xl text-center"
+        style={{ background: 'var(--background)', color: 'var(--muted)' }}
+      >
+        먼저 스포츠를 선택하세요
       </div>
     );
   }
@@ -178,14 +208,24 @@ export default function TeamSelector({
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-4 animate-pulse">
-        <div className="h-12 bg-gray-200 rounded-lg"></div>
-        <div className="h-12 bg-gray-200 rounded-lg"></div>
+        <div className="h-12 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
+        <div className="h-12 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="text-red-500 text-sm p-4 bg-red-50 rounded-lg">{error}</div>;
+    return (
+      <div
+        className="text-sm p-4 rounded-lg"
+        style={{
+          background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+          color: isDark ? '#f87171' : '#b91c1c',
+        }}
+      >
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -197,8 +237,9 @@ export default function TeamSelector({
           onChange={onTeamAChange}
           excludeId={teamBId}
           placeholder="홈팀 선택..."
-          label="🏠 HOME"
+          label="HOME"
           disabled={disabled}
+          isDark={isDark}
         />
         <SearchableSelect
           teams={teams}
@@ -206,22 +247,34 @@ export default function TeamSelector({
           onChange={onTeamBChange}
           excludeId={teamAId}
           placeholder="원정팀 선택..."
-          label="✈️ AWAY"
+          label="AWAY"
           disabled={disabled}
+          isDark={isDark}
         />
       </div>
 
       {isSameTeam && (
-        <div className="text-red-500 text-sm font-medium p-3 bg-red-50 rounded-lg text-center">
-          ⚠️ 같은 팀끼리 매치업 불가
+        <div
+          className="text-sm font-medium p-3 rounded-lg text-center"
+          style={{
+            background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+            color: isDark ? '#f87171' : '#b91c1c',
+          }}
+        >
+          같은 팀끼리 매치업 불가
         </div>
       )}
 
       {teamAId && teamBId && !isSameTeam && (
-        <div className="text-center py-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-          <div className="text-xs text-gray-500 mb-1">MATCHUP</div>
-          <div className="text-lg font-bold text-gray-800">
-            {teamAName} <span className="text-gray-400 mx-2">vs</span> {teamBName}
+        <div
+          className="text-center py-4 rounded-xl"
+          style={{
+            background: isDark ? 'rgba(59, 130, 246, 0.1)' : 'linear-gradient(to right, #eff6ff, #eef2ff)',
+          }}
+        >
+          <div className="text-xs mb-1" style={{ color: 'var(--muted)' }}>MATCHUP</div>
+          <div className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>
+            {teamAName} <span style={{ color: 'var(--muted)' }} className="mx-2">vs</span> {teamBName}
           </div>
         </div>
       )}

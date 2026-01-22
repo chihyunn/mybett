@@ -1,6 +1,7 @@
 'use client';
 
 import { calculatePredictedEdge, formatEdgePercent } from '@/lib/edge';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface EdgeDisplayProps {
   pAgent: number | null;
@@ -8,10 +9,19 @@ interface EdgeDisplayProps {
 }
 
 export default function EdgeDisplay({ pAgent, pMarket }: EdgeDisplayProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   if (pAgent === null || pMarket === null) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="text-sm text-gray-500 text-center">
+      <div
+        className="p-4 rounded-lg"
+        style={{
+          background: 'var(--background)',
+          border: '1px solid var(--card-border)',
+        }}
+      >
+        <div className="text-sm text-center" style={{ color: 'var(--muted)' }}>
           확률을 입력하면 Edge가 계산됩니다
         </div>
       </div>
@@ -21,22 +31,44 @@ export default function EdgeDisplay({ pAgent, pMarket }: EdgeDisplayProps) {
   const edge = calculatePredictedEdge(pAgent, pMarket);
   const edgePercent = edge * 100;
 
-  const getEdgeColor = () => {
-    if (edge < 0) return 'text-red-600 bg-red-50 border-red-200';
-    if (edge < 0.05) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    if (edge < 0.10) return 'text-green-600 bg-green-50 border-green-200';
-    return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+  const getEdgeStyle = () => {
+    if (edge < 0) {
+      return {
+        background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fef2f2',
+        border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca'}`,
+        color: isDark ? '#f87171' : '#dc2626',
+      };
+    }
+    if (edge < 0.05) {
+      return {
+        background: isDark ? 'rgba(234, 179, 8, 0.15)' : '#fefce8',
+        border: `1px solid ${isDark ? 'rgba(234, 179, 8, 0.3)' : '#fef08a'}`,
+        color: isDark ? '#fbbf24' : '#ca8a04',
+      };
+    }
+    if (edge < 0.10) {
+      return {
+        background: isDark ? 'rgba(34, 197, 94, 0.15)' : '#f0fdf4',
+        border: `1px solid ${isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0'}`,
+        color: isDark ? '#4ade80' : '#16a34a',
+      };
+    }
+    return {
+      background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5',
+      border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.3)' : '#a7f3d0'}`,
+      color: isDark ? '#34d399' : '#059669',
+    };
   };
 
   const getEdgeLabel = () => {
-    if (edge < 0) return '음수 Edge ⚠️';
+    if (edge < 0) return '음수 Edge';
     if (edge < 0.05) return 'Edge 부족';
     if (edge < 0.10) return '적정 Edge';
-    return '높은 Edge 🔥';
+    return '높은 Edge';
   };
 
   return (
-    <div className={`p-4 rounded-lg border ${getEdgeColor()}`}>
+    <div className="p-4 rounded-lg" style={getEdgeStyle()}>
       <div className="text-center">
         <div className="text-sm font-medium mb-1">예측 에지 (Δp)</div>
         <div className="text-3xl font-bold">{formatEdgePercent(edge)}</div>

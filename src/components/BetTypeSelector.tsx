@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface BetType {
   id: string;
@@ -19,10 +20,10 @@ interface BetTypeSelectorProps {
   disabled?: boolean;
 }
 
-const BET_TYPE_STYLES: Record<string, { icon: string; color: string }> = {
-  ML: { icon: '🎯', color: 'emerald' },
-  SPREAD: { icon: '📊', color: 'purple' },
-  TOTAL: { icon: '📈', color: 'amber' },
+const BET_TYPE_STYLES: Record<string, { icon: string; activeColor: string }> = {
+  ML: { icon: '', activeColor: '#10b981' },
+  SPREAD: { icon: '', activeColor: '#8b5cf6' },
+  TOTAL: { icon: '', activeColor: '#f59e0b' },
 };
 
 export default function BetTypeSelector({
@@ -34,6 +35,8 @@ export default function BetTypeSelector({
   onSelectedTeamChange,
   disabled,
 }: BetTypeSelectorProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [betTypes, setBetTypes] = useState<BetType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +60,7 @@ export default function BetTypeSelector({
       <div className="animate-pulse space-y-4">
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 flex-1 bg-gray-200 rounded-lg"></div>
+            <div key={i} className="h-12 flex-1 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
           ))}
         </div>
       </div>
@@ -70,13 +73,13 @@ export default function BetTypeSelector({
     <div className="space-y-4">
       {/* Bet Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
           베팅 타입
         </label>
         <div className="flex gap-2">
           {betTypes.map((bt) => {
             const isSelected = betTypeId === bt.id;
-            const style = BET_TYPE_STYLES[bt.code] || { icon: '🎲', color: 'gray' };
+            const style = BET_TYPE_STYLES[bt.code] || { icon: '', activeColor: '#6b7280' };
 
             return (
               <button
@@ -84,37 +87,27 @@ export default function BetTypeSelector({
                 type="button"
                 onClick={() => onBetTypeChange(bt.id)}
                 disabled={disabled}
-                className={`
-                  flex-1 py-3 px-3 rounded-lg font-medium transition-all duration-200
-                  flex items-center justify-center gap-2
-                  ${
-                    isSelected
-                      ? `bg-${style.color}-500 text-white ring-2 ring-${style.color}-300`
-                      : `bg-gray-100 text-gray-700 hover:bg-${style.color}-100`
-                  }
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
+                className="flex-1 py-3 px-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={
                   isSelected
                     ? {
-                        backgroundColor:
-                          style.color === 'emerald'
-                            ? '#10b981'
-                            : style.color === 'purple'
-                            ? '#8b5cf6'
-                            : '#f59e0b',
+                        backgroundColor: style.activeColor,
+                        color: 'white',
+                        boxShadow: `0 0 0 2px ${style.activeColor}40`,
                       }
-                    : undefined
+                    : {
+                        backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                        color: 'var(--foreground)',
+                      }
                 }
               >
-                <span>{style.icon}</span>
                 <span className="text-sm">{bt.code}</span>
               </button>
             );
           })}
         </div>
         {selectedBetType?.description && (
-          <p className="mt-2 text-xs text-gray-500 text-center">
+          <p className="mt-2 text-xs text-center" style={{ color: 'var(--muted)' }}>
             {selectedBetType.description}
           </p>
         )}
@@ -123,7 +116,7 @@ export default function BetTypeSelector({
       {/* Team Selection */}
       {betTypeId && teamAName && teamBName && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
             베팅 대상
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -131,18 +124,23 @@ export default function BetTypeSelector({
               type="button"
               onClick={() => onSelectedTeamChange('A')}
               disabled={disabled}
-              className={`
-                py-4 px-4 rounded-xl font-semibold transition-all duration-200
-                ${
-                  selectedTeam === 'A'
-                    ? 'bg-blue-600 text-white ring-2 ring-blue-300 scale-[1.02]'
-                    : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-                }
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
+              className="py-4 px-4 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={
+                selectedTeam === 'A'
+                  ? {
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.4)',
+                      transform: 'scale(1.02)',
+                    }
+                  : {
+                      backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                      color: 'var(--foreground)',
+                    }
+              }
             >
-              <div className="text-xs text-opacity-70 mb-1">
-                {selectedTeam === 'A' ? '✓ 선택됨' : 'HOME'}
+              <div className="text-xs mb-1" style={{ opacity: 0.7 }}>
+                {selectedTeam === 'A' ? '선택됨' : 'HOME'}
               </div>
               <div className="truncate">{teamAName}</div>
             </button>
@@ -150,18 +148,23 @@ export default function BetTypeSelector({
               type="button"
               onClick={() => onSelectedTeamChange('B')}
               disabled={disabled}
-              className={`
-                py-4 px-4 rounded-xl font-semibold transition-all duration-200
-                ${
-                  selectedTeam === 'B'
-                    ? 'bg-blue-600 text-white ring-2 ring-blue-300 scale-[1.02]'
-                    : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-                }
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
+              className="py-4 px-4 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={
+                selectedTeam === 'B'
+                  ? {
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.4)',
+                      transform: 'scale(1.02)',
+                    }
+                  : {
+                      backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                      color: 'var(--foreground)',
+                    }
+              }
             >
-              <div className="text-xs text-opacity-70 mb-1">
-                {selectedTeam === 'B' ? '✓ 선택됨' : 'AWAY'}
+              <div className="text-xs mb-1" style={{ opacity: 0.7 }}>
+                {selectedTeam === 'B' ? '선택됨' : 'AWAY'}
               </div>
               <div className="truncate">{teamBName}</div>
             </button>

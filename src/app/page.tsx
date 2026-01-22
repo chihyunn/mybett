@@ -6,6 +6,7 @@ import BalanceCard from '@/components/BalanceCard';
 import ProfitCard from '@/components/ProfitCard';
 import StatsCard from '@/components/StatsCard';
 import BalanceChart from '@/components/BalanceChart';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Balance {
   initialAmount: number;
@@ -39,6 +40,8 @@ interface StreakData {
 }
 
 export default function DashboardPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [balance, setBalance] = useState<Balance | null>(null);
   const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   const [balanceHistory, setBalanceHistory] = useState<BalanceHistoryItem[]>([]);
@@ -81,10 +84,10 @@ export default function DashboardPage() {
       <div className="py-4 md:py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-48"></div>
+            <div className="h-8 rounded w-48" style={{ background: 'var(--card-border)' }}></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-28 md:h-32 bg-gray-200 rounded-lg"></div>
+                <div key={i} className="h-28 md:h-32 rounded-lg" style={{ background: 'var(--card-border)' }}></div>
               ))}
             </div>
           </div>
@@ -100,7 +103,7 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">대시보드</h1>
+              <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--foreground)' }}>대시보드</h1>
               {streakData && streakData.globalStreak >= 3 && (
                 <span className="px-3 py-1 text-sm font-bold bg-blue-500 text-white rounded-full animate-pulse">
                   🔥 {streakData.globalStreak}연승
@@ -112,7 +115,7 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <p className="text-gray-500 text-sm">에이전트 vs 시장 확률 분석</p>
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>에이전트 vs 시장 확률 분석</p>
           </div>
           <Link
             href="/predict"
@@ -140,10 +143,13 @@ export default function DashboardPage() {
 
         {/* Balance History Chart */}
         {balance && (
-          <div className="bg-white rounded-lg shadow mb-8">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800">밸런스 추이</h2>
-              <p className="text-sm text-gray-500">시간에 따른 밸런스 변화</p>
+          <div
+            className="rounded-lg shadow mb-8"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+          >
+            <div className="p-4" style={{ borderBottom: '1px solid var(--card-border)' }}>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>밸런스 추이</h2>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>시간에 따른 밸런스 변화</p>
             </div>
             <div className="p-4">
               <BalanceChart data={balanceHistory} initialAmount={balance.initialAmount} />
@@ -155,19 +161,21 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Link
             href="/predict"
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            className="p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
           >
             <div className="text-2xl mb-2">📊</div>
-            <div className="font-medium text-gray-900">예측 입력</div>
-            <div className="text-xs text-gray-500">Edge 계산 & 추천</div>
+            <div className="font-medium" style={{ color: 'var(--foreground)' }}>예측 입력</div>
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>Edge 계산 & 추천</div>
           </Link>
 
           <Link
             href="/history"
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            className="p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
           >
             <div className="text-2xl mb-2">📝</div>
-            <div className="font-medium text-gray-900">베팅 기록</div>
+            <div className="font-medium" style={{ color: 'var(--foreground)' }}>베팅 기록</div>
             {pendingCount > 0 && (
               <div className="text-xs text-orange-500">{pendingCount}개 대기중</div>
             )}
@@ -175,68 +183,80 @@ export default function DashboardPage() {
 
           <Link
             href="/analysis"
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            className="p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
           >
             <div className="text-2xl mb-2">📈</div>
-            <div className="font-medium text-gray-900">에지 분석</div>
-            <div className="text-xs text-gray-500">Δp vs Δr 비교</div>
+            <div className="font-medium" style={{ color: 'var(--foreground)' }}>에지 분석</div>
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>Δp vs Δr 비교</div>
           </Link>
 
           <Link
             href="/history?filter=pending"
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            className="p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
           >
             <div className="text-2xl mb-2">✏️</div>
-            <div className="font-medium text-gray-900">결과 입력</div>
-            <div className="text-xs text-gray-500">대기중 베팅 처리</div>
+            <div className="font-medium" style={{ color: 'var(--foreground)' }}>결과 입력</div>
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>대기중 베팅 처리</div>
           </Link>
         </div>
 
         {/* Recent Bets */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">최근 베팅</h2>
-            <Link href="/history" className="text-sm text-blue-600 hover:text-blue-800">
+        <div
+          className="rounded-lg shadow"
+          style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+        >
+          <div
+            className="p-4 flex justify-between items-center"
+            style={{ borderBottom: '1px solid var(--card-border)' }}
+          >
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>최근 베팅</h2>
+            <Link href="/history" className="text-sm text-blue-500 hover:text-blue-400">
               전체 보기 →
             </Link>
           </div>
 
           {recentBets.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center" style={{ color: 'var(--muted)' }}>
               아직 베팅 기록이 없습니다
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
-              {recentBets.map((bet) => (
-                <div key={bet.id} className="p-4 flex justify-between items-center">
+            <div style={{ borderColor: 'var(--card-border)' }}>
+              {recentBets.map((bet, index) => (
+                <div
+                  key={bet.id}
+                  className="p-4 flex justify-between items-center"
+                  style={{ borderTop: index > 0 ? '1px solid var(--card-border)' : undefined }}
+                >
                   <div>
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium" style={{ color: 'var(--foreground)' }}>
                       {bet.teamA.name} vs {bet.teamB.name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs" style={{ color: 'var(--muted)' }}>
                       {new Date(bet.createdAt).toLocaleDateString('ko-KR')}
                     </div>
                   </div>
                   <div className="text-right">
                     {bet.result === null ? (
-                      <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded">
+                      <span className="px-2 py-1 text-xs rounded" style={{ background: isDark ? 'rgba(234, 179, 8, 0.2)' : '#fef9c3', color: isDark ? '#fbbf24' : '#a16207' }}>
                         대기중
                       </span>
                     ) : bet.result === 1 ? (
                       <div>
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                        <span className="px-2 py-1 text-xs rounded" style={{ background: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7', color: isDark ? '#4ade80' : '#15803d' }}>
                           승리
                         </span>
-                        <div className="text-sm text-green-600 mt-1">
+                        <div className="text-sm text-green-500 mt-1">
                           +${bet.profitLoss?.toLocaleString()}
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">
+                        <span className="px-2 py-1 text-xs rounded" style={{ background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2', color: isDark ? '#f87171' : '#b91c1c' }}>
                           패배
                         </span>
-                        <div className="text-sm text-red-600 mt-1">
+                        <div className="text-sm text-red-500 mt-1">
                           ${bet.profitLoss?.toLocaleString()}
                         </div>
                       </div>

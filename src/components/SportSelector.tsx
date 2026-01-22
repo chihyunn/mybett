@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Sport {
   id: string;
@@ -14,33 +15,16 @@ interface SportSelectorProps {
   disabled?: boolean;
 }
 
-const SPORT_ICONS: Record<string, string> = {
-  NBA: '🏀',
-  MLB: '⚾',
-  NHL: '🏒',
-  NFL: '🏈',
-};
-
-const SPORT_COLORS: Record<string, { active: string; inactive: string }> = {
-  NBA: {
-    active: 'bg-orange-500 text-white ring-2 ring-orange-300',
-    inactive: 'bg-gray-100 text-gray-700 hover:bg-orange-100',
-  },
-  MLB: {
-    active: 'bg-red-600 text-white ring-2 ring-red-300',
-    inactive: 'bg-gray-100 text-gray-700 hover:bg-red-100',
-  },
-  NHL: {
-    active: 'bg-blue-700 text-white ring-2 ring-blue-300',
-    inactive: 'bg-gray-100 text-gray-700 hover:bg-blue-100',
-  },
-  NFL: {
-    active: 'bg-green-700 text-white ring-2 ring-green-300',
-    inactive: 'bg-gray-100 text-gray-700 hover:bg-green-100',
-  },
+const SPORT_COLORS: Record<string, string> = {
+  NBA: '#f97316',
+  MLB: '#dc2626',
+  NHL: '#1d4ed8',
+  NFL: '#15803d',
 };
 
 export default function SportSelector({ value, onChange, disabled }: SportSelectorProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +48,7 @@ export default function SportSelector({ value, onChange, disabled }: SportSelect
       <div className="animate-pulse">
         <div className="flex gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 w-24 bg-gray-200 rounded-xl"></div>
+            <div key={i} className="h-16 w-24 rounded-xl" style={{ background: 'var(--card-border)' }}></div>
           ))}
         </div>
       </div>
@@ -73,17 +57,13 @@ export default function SportSelector({ value, onChange, disabled }: SportSelect
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-3">
+      <label className="block text-sm font-medium mb-3" style={{ color: 'var(--foreground)' }}>
         스포츠 선택
       </label>
       <div className="flex gap-3">
         {sports.map((sport) => {
           const isSelected = value === sport.id;
-          const icon = SPORT_ICONS[sport.name] || '🎯';
-          const colors = SPORT_COLORS[sport.name] || {
-            active: 'bg-blue-600 text-white ring-2 ring-blue-300',
-            inactive: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-          };
+          const activeColor = SPORT_COLORS[sport.name] || '#3b82f6';
 
           return (
             <button
@@ -91,14 +71,20 @@ export default function SportSelector({ value, onChange, disabled }: SportSelect
               type="button"
               onClick={() => onChange(sport.id)}
               disabled={disabled}
-              className={`
-                flex-1 py-4 px-4 rounded-xl font-medium transition-all duration-200
-                flex flex-col items-center gap-1
-                ${isSelected ? colors.active : colors.inactive}
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
+              className="flex-1 py-4 px-4 rounded-xl font-medium transition-all duration-200 flex flex-col items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={
+                isSelected
+                  ? {
+                      backgroundColor: activeColor,
+                      color: 'white',
+                      boxShadow: `0 0 0 2px ${activeColor}40`,
+                    }
+                  : {
+                      backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                      color: 'var(--foreground)',
+                    }
+              }
             >
-              <span className="text-2xl">{icon}</span>
               <span className="text-sm font-semibold">{sport.name}</span>
             </button>
           );

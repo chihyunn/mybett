@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface StreakData {
   globalStreak: number;
@@ -10,6 +11,8 @@ interface StreakData {
 }
 
 export default function StreakWarningBanner() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [streak, setStreak] = useState<StreakData | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -33,7 +36,15 @@ export default function StreakWarningBanner() {
   const lossCount = Math.abs(streak.globalStreak);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg">
+    <div
+      className="fixed top-0 left-0 right-0 z-50 text-white"
+      style={{
+        background: isDark
+          ? 'linear-gradient(to right, #991b1b, #7f1d1d)'
+          : 'linear-gradient(to right, #dc2626, #b91c1c)',
+        boxShadow: isDark ? '0 4px 6px rgba(0,0,0,0.4)' : '0 4px 6px rgba(0,0,0,0.1)',
+      }}
+    >
       <div className="max-w-6xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -42,7 +53,7 @@ export default function StreakWarningBanner() {
               <div className="font-bold text-lg">
                 🔥 {lossCount}연패 경고!
               </div>
-              <div className="text-sm text-red-100">
+              <div className="text-sm" style={{ color: isDark ? '#fecaca' : '#fee2e2' }}>
                 최근 {lossCount}경기 연속 패배 중입니다. 베팅 금액이 자동으로 낮춰집니다.
               </div>
             </div>
@@ -52,9 +63,12 @@ export default function StreakWarningBanner() {
               {streak.globalLastResults.slice(0, 5).map((r, i) => (
                 <span
                   key={i}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    r === 1 ? 'bg-green-500' : 'bg-red-900'
-                  }`}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{
+                    background: r === 1
+                      ? (isDark ? '#16a34a' : '#22c55e')
+                      : (isDark ? '#7f1d1d' : '#991b1b'),
+                  }}
                 >
                   {r === 1 ? 'W' : 'L'}
                 </span>
@@ -62,7 +76,10 @@ export default function StreakWarningBanner() {
             </div>
             <button
               onClick={() => setDismissed(true)}
-              className="text-red-200 hover:text-white transition-colors"
+              className="transition-colors"
+              style={{ color: isDark ? '#fca5a5' : '#fecaca' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = isDark ? '#fca5a5' : '#fecaca')}
             >
               ✕
             </button>

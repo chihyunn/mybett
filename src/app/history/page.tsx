@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import BetHistoryTable from '@/components/BetHistoryTable';
 import ResultInput from '@/components/ResultInput';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Bet {
   id: string;
@@ -25,6 +26,8 @@ interface Bet {
 }
 
 export default function HistoryPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +100,7 @@ export default function HistoryPage() {
     <div className="py-4 md:py-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center mb-4 md:mb-6">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">베팅 기록</h1>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--foreground)' }}>베팅 기록</h1>
           <Link
             href="/predict"
             className="px-3 py-2 md:px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
@@ -111,30 +114,39 @@ export default function HistoryPage() {
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              filter === 'all' ? 'bg-blue-600 text-white' : ''
             }`}
+            style={filter !== 'all' ? {
+              background: 'var(--card-bg)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--card-border)',
+            } : undefined}
           >
             전체 ({bets.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'pending'
-                ? 'bg-yellow-500 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              filter === 'pending' ? 'bg-yellow-500 text-white' : ''
             }`}
+            style={filter !== 'pending' ? {
+              background: 'var(--card-bg)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--card-border)',
+            } : undefined}
           >
             대기중 ({pendingCount})
           </button>
           <button
             onClick={() => setFilter('settled')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'settled'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              filter === 'settled' ? 'bg-green-600 text-white' : ''
             }`}
+            style={filter !== 'settled' ? {
+              background: 'var(--card-bg)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--card-border)',
+            } : undefined}
           >
             완료 ({settledCount})
           </button>
@@ -142,13 +154,23 @@ export default function HistoryPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center gap-2 text-red-700">
+          <div
+            className="mb-6 p-4 rounded-lg"
+            style={{
+              background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+              border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca'}`,
+            }}
+          >
+            <div className="flex items-center gap-2" style={{ color: isDark ? '#f87171' : '#b91c1c' }}>
               <span>⚠️</span>
               <span>{error}</span>
               <button
                 onClick={fetchBets}
-                className="ml-auto px-3 py-1 text-sm bg-red-100 hover:bg-red-200 rounded"
+                className="ml-auto px-3 py-1 text-sm rounded"
+                style={{
+                  background: isDark ? 'rgba(239, 68, 68, 0.25)' : '#fecaca',
+                  color: isDark ? '#f87171' : '#b91c1c',
+                }}
               >
                 다시 시도
               </button>
@@ -157,15 +179,18 @@ export default function HistoryPage() {
         )}
 
         {/* Bet History Table */}
-        <div className="bg-white rounded-lg shadow">
+        <div
+          className="rounded-lg shadow"
+          style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+        >
           {loading ? (
             <div className="p-4">
               <div className="animate-pulse space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="flex gap-4">
-                    <div className="h-12 bg-gray-200 rounded flex-1"></div>
-                    <div className="h-12 bg-gray-200 rounded w-24"></div>
-                    <div className="h-12 bg-gray-200 rounded w-20"></div>
+                    <div className="h-12 rounded flex-1" style={{ background: 'var(--card-border)' }}></div>
+                    <div className="h-12 rounded w-24" style={{ background: 'var(--card-border)' }}></div>
+                    <div className="h-12 rounded w-20" style={{ background: 'var(--card-border)' }}></div>
                   </div>
                 ))}
               </div>

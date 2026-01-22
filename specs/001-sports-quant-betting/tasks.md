@@ -266,3 +266,86 @@ T046, T047, T048 (components) - parallel
 | Parallel Tasks [P] | 30 |
 
 **MVP Scope**: Phase 1-3 (30 tasks) → 예측 입력 & 베팅 추천 기능
+
+---
+
+## Phase 8: Dark Mode UI (Enhancement)
+
+**Spec**: [dark-mode-spec.md](./dark-mode-spec.md)
+**Goal**: 전체 앱에 다크모드 일관성 있게 적용
+
+**Foundation (이미 완료)**:
+- [x] T056 ThemeContext 생성 (src/contexts/ThemeContext.tsx)
+- [x] T057 CSS 변수 정의 (src/app/globals.css)
+- [x] T058 설정 페이지 토글 UI (src/app/settings/page.tsx)
+- [x] T059 [P] TopHeader 다크모드 (src/components/TopHeader.tsx)
+- [x] T060 [P] BottomNav 다크모드 (src/components/BottomNav.tsx)
+- [x] T061 [P] BalanceCard 다크모드 (src/components/BalanceCard.tsx)
+- [x] T062 [P] ProfitCard 다크모드 (src/components/ProfitCard.tsx)
+- [x] T063 [P] StatsCard 다크모드 (src/components/StatsCard.tsx)
+- [x] T064 BalanceChart 다크모드 (src/components/BalanceChart.tsx)
+- [x] T065 ROIAnalysis 다크모드 (src/components/ROIAnalysis.tsx)
+
+### Pages (P1)
+
+- [ ] T066 [DM] Dashboard 페이지 다크모드 in src/app/page.tsx (로딩, 카드래퍼, Quick Actions, 최근베팅)
+- [ ] T067 [DM] Predict 페이지 다크모드 in src/app/predict/page.tsx (로딩, 폼섹션, 버튼)
+- [ ] T068 [DM] History 페이지 다크모드 in src/app/history/page.tsx (필터버튼, 테이블컨테이너)
+- [ ] T069 [DM] Analysis 페이지 다크모드 in src/app/analysis/page.tsx (필터섹션, CrossAnalysisTable)
+
+### Core Components (P2)
+
+- [ ] T070 [P] [DM] BetHistoryTable 다크모드 in src/components/BetHistoryTable.tsx (테이블 전체)
+- [ ] T071 [P] [DM] ResultInput 다크모드 in src/components/ResultInput.tsx (모달 전체)
+- [ ] T072 [P] [DM] EdgeDisplay 다크모드 in src/components/EdgeDisplay.tsx
+- [ ] T073 [P] [DM] BetRecommendation 다크모드 in src/components/BetRecommendation.tsx
+
+### Input Components (P3)
+
+- [ ] T074 [P] [DM] ProbabilityInput 다크모드 in src/components/ProbabilityInput.tsx
+- [ ] T075 [P] [DM] TeamSelector 다크모드 in src/components/TeamSelector.tsx
+- [ ] T076 [P] [DM] BetTypeSelector 다크모드 in src/components/BetTypeSelector.tsx
+- [ ] T077 [P] [DM] SportSelector 다크모드 in src/components/SportSelector.tsx
+
+### Analysis Components (P4)
+
+- [ ] T078 [P] [DM] AnalysisTable 다크모드 in src/components/AnalysisTable.tsx
+- [ ] T079 [P] [DM] PortfolioSummary 다크모드 in src/components/PortfolioSummary.tsx
+- [ ] T080 [P] [DM] MddCard 다크모드 in src/components/MddCard.tsx
+- [ ] T081 [P] [DM] StreakWarningBanner 다크모드 in src/components/StreakWarningBanner.tsx
+
+### Final
+
+- [ ] T082 다크모드 전체 QA 및 일관성 확인
+
+**Checkpoint**: 전체 앱 다크모드 지원 완료
+
+---
+
+## Dark Mode Task Summary
+
+| Priority | Tasks | Status |
+|----------|-------|--------|
+| Foundation | T056-T065 (10) | ✅ 완료 |
+| P1 Pages | T066-T069 (4) | ⬜ 대기 |
+| P2 Core Components | T070-T073 (4) | ⬜ 대기 |
+| P3 Input Components | T074-T077 (4) | ⬜ 대기 |
+| P4 Analysis Components | T078-T081 (4) | ⬜ 대기 |
+| Final QA | T082 (1) | ⬜ 대기 |
+| **Total Dark Mode** | **27** | **10/27** |
+
+### Parallel Opportunities
+
+**Pages (P1)**: 순차 실행 권장 (공통 패턴 확립 후)
+
+**Components (P2-P4)**:
+```bash
+# P2 동시 실행 가능
+Task T070, T071, T072, T073 - 각각 독립 파일
+
+# P3 동시 실행 가능
+Task T074, T075, T076, T077 - 각각 독립 파일
+
+# P4 동시 실행 가능
+Task T078, T079, T080, T081 - 각각 독립 파일
+```
