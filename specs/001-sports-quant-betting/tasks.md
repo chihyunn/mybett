@@ -288,35 +288,35 @@ T046, T047, T048 (components) - parallel
 
 ### Pages (P1)
 
-- [ ] T066 [DM] Dashboard 페이지 다크모드 in src/app/page.tsx (로딩, 카드래퍼, Quick Actions, 최근베팅)
-- [ ] T067 [DM] Predict 페이지 다크모드 in src/app/predict/page.tsx (로딩, 폼섹션, 버튼)
-- [ ] T068 [DM] History 페이지 다크모드 in src/app/history/page.tsx (필터버튼, 테이블컨테이너)
-- [ ] T069 [DM] Analysis 페이지 다크모드 in src/app/analysis/page.tsx (필터섹션, CrossAnalysisTable)
+- [x] T066 [DM] Dashboard 페이지 다크모드 in src/app/page.tsx (로딩, 카드래퍼, Quick Actions, 최근베팅)
+- [x] T067 [DM] Predict 페이지 다크모드 in src/app/predict/page.tsx (로딩, 폼섹션, 버튼)
+- [x] T068 [DM] History 페이지 다크모드 in src/app/history/page.tsx (필터버튼, 테이블컨테이너)
+- [x] T069 [DM] Analysis 페이지 다크모드 in src/app/analysis/page.tsx (필터섹션, CrossAnalysisTable)
 
 ### Core Components (P2)
 
-- [ ] T070 [P] [DM] BetHistoryTable 다크모드 in src/components/BetHistoryTable.tsx (테이블 전체)
-- [ ] T071 [P] [DM] ResultInput 다크모드 in src/components/ResultInput.tsx (모달 전체)
-- [ ] T072 [P] [DM] EdgeDisplay 다크모드 in src/components/EdgeDisplay.tsx
-- [ ] T073 [P] [DM] BetRecommendation 다크모드 in src/components/BetRecommendation.tsx
+- [x] T070 [P] [DM] BetHistoryTable 다크모드 in src/components/BetHistoryTable.tsx (테이블 전체)
+- [x] T071 [P] [DM] ResultInput 다크모드 in src/components/ResultInput.tsx (모달 전체)
+- [x] T072 [P] [DM] EdgeDisplay 다크모드 in src/components/EdgeDisplay.tsx
+- [x] T073 [P] [DM] BetRecommendation 다크모드 in src/components/BetRecommendation.tsx
 
 ### Input Components (P3)
 
-- [ ] T074 [P] [DM] ProbabilityInput 다크모드 in src/components/ProbabilityInput.tsx
-- [ ] T075 [P] [DM] TeamSelector 다크모드 in src/components/TeamSelector.tsx
-- [ ] T076 [P] [DM] BetTypeSelector 다크모드 in src/components/BetTypeSelector.tsx
-- [ ] T077 [P] [DM] SportSelector 다크모드 in src/components/SportSelector.tsx
+- [x] T074 [P] [DM] ProbabilityInput 다크모드 in src/components/ProbabilityInput.tsx
+- [x] T075 [P] [DM] TeamSelector 다크모드 in src/components/TeamSelector.tsx
+- [x] T076 [P] [DM] BetTypeSelector 다크모드 in src/components/BetTypeSelector.tsx
+- [x] T077 [P] [DM] SportSelector 다크모드 in src/components/SportSelector.tsx
 
 ### Analysis Components (P4)
 
-- [ ] T078 [P] [DM] AnalysisTable 다크모드 in src/components/AnalysisTable.tsx
-- [ ] T079 [P] [DM] PortfolioSummary 다크모드 in src/components/PortfolioSummary.tsx
-- [ ] T080 [P] [DM] MddCard 다크모드 in src/components/MddCard.tsx
-- [ ] T081 [P] [DM] StreakWarningBanner 다크모드 in src/components/StreakWarningBanner.tsx
+- [x] T078 [P] [DM] AnalysisTable 다크모드 in src/components/AnalysisTable.tsx
+- [x] T079 [P] [DM] PortfolioSummary 다크모드 in src/components/PortfolioSummary.tsx
+- [x] T080 [P] [DM] MddCard 다크모드 in src/components/MddCard.tsx
+- [x] T081 [P] [DM] StreakWarningBanner 다크모드 in src/components/StreakWarningBanner.tsx
 
 ### Final
 
-- [ ] T082 다크모드 전체 QA 및 일관성 확인
+- [x] T082 다크모드 전체 QA 및 일관성 확인
 
 **Checkpoint**: 전체 앱 다크모드 지원 완료
 
@@ -327,12 +327,12 @@ T046, T047, T048 (components) - parallel
 | Priority | Tasks | Status |
 |----------|-------|--------|
 | Foundation | T056-T065 (10) | ✅ 완료 |
-| P1 Pages | T066-T069 (4) | ⬜ 대기 |
-| P2 Core Components | T070-T073 (4) | ⬜ 대기 |
-| P3 Input Components | T074-T077 (4) | ⬜ 대기 |
-| P4 Analysis Components | T078-T081 (4) | ⬜ 대기 |
-| Final QA | T082 (1) | ⬜ 대기 |
-| **Total Dark Mode** | **27** | **10/27** |
+| P1 Pages | T066-T069 (4) | ✅ 완료 |
+| P2 Core Components | T070-T073 (4) | ✅ 완료 |
+| P3 Input Components | T074-T077 (4) | ✅ 완료 |
+| P4 Analysis Components | T078-T081 (4) | ✅ 완료 |
+| Final QA | T082 (1) | ✅ 완료 |
+| **Total Dark Mode** | **27** | **27/27 ✅** |
 
 ### Parallel Opportunities
 
