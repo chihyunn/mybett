@@ -255,7 +255,7 @@ T046, T047, T048 (components) - parallel
 
 | Category | Count |
 |----------|-------|
-| Total Tasks | 55 |
+| Total Tasks | 86 |
 | Phase 1 (Setup) | 6 |
 | Phase 2 (Foundational) | 11 |
 | Phase 3 (US1+US2) | 13 |
@@ -263,7 +263,9 @@ T046, T047, T048 (components) - parallel
 | Phase 5 (US4) | 7 |
 | Phase 6 (US5) | 6 |
 | Phase 7 (Polish) | 5 |
-| Parallel Tasks [P] | 30 |
+| Phase 8 (Dark Mode) | 27 |
+| Phase 9 (LOL Esports) | 4 |
+| Parallel Tasks [P] | 32 |
 
 **MVP Scope**: Phase 1-3 (30 tasks) → 예측 입력 & 베팅 추천 기능
 
@@ -349,3 +351,33 @@ Task T074, T075, T076, T077 - 각각 독립 파일
 # P4 동시 실행 가능
 Task T078, T079, T080, T081 - 각각 독립 파일
 ```
+
+---
+
+## Phase 9: LOL Esports Support (Enhancement)
+
+**Goal**: LOL LCK/LPL 리그 지원 추가 (이스포츠 베팅)
+
+### Data Updates
+
+- [x] T083 [P] teams.ts에 LOL_LCK 스포츠 및 10개 팀 추가 (T1, Gen.G, HLE, DK 등)
+- [x] T084 [P] teams.ts에 LOL_LPL 스포츠 및 17개 팀 추가 (JDG, BLG, TES 등)
+- [x] T085 betTypes.ts 간소화: ML(승패), SPREAD(핸디캡), TOTAL(오버/언더) 3타입
+
+### Database Seed
+
+- [x] T086 prisma seed 실행 (6개 스포츠, 151개 팀, 3개 베팅타입)
+
+**Checkpoint**: LOL LCK/LPL 리그 베팅 지원 완료
+
+---
+
+## Phase 9 Task Summary
+
+| Task | Description | Status |
+|------|-------------|--------|
+| T083 | LOL_LCK 팀 추가 | ✅ 완료 |
+| T084 | LOL_LPL 팀 추가 | ✅ 완료 |
+| T085 | BetTypes 간소화 | ✅ 완료 |
+| T086 | DB Seed 실행 | ✅ 완료 |
+| **Total** | **4** | **4/4 ✅** |

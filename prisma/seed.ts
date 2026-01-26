@@ -48,26 +48,27 @@ interface SeedData {
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Check if database already has data - skip if so (prevent accidental data loss)
-  const existingBets = await prisma.bet.count();
-  const existingBalance = await prisma.balance.findUnique({ where: { id: 'main' } });
+  // Check if seed-data.json exists (full restore mode)
+  const seedDataPath = path.join(__dirname, 'seed-data.json');
+  const isForceMode = process.argv.includes('--force');
 
-  if (existingBets > 0 || (existingBalance && existingBalance.totalBets > 0)) {
-    console.log('⚠️ Database already has data! Skipping seed to prevent data loss.');
-    console.log(`   - Existing bets: ${existingBets}`);
-    console.log(`   - Balance total bets: ${existingBalance?.totalBets || 0}`);
-    console.log('   - Use --force flag to override: npx tsx prisma/seed.ts --force');
-
-    // Only proceed with force flag
-    if (!process.argv.includes('--force')) {
-      console.log('🛡️ Seed cancelled - your data is safe!');
-      return;
-    }
-    console.log('⚠️ Force flag detected - proceeding with seed...');
+  // If seed-data.json exists, do full restore (migration mode)
+  if (fs.existsSync(seedDataPath) && isForceMode) {
+    console.log('📦 Found seed-data.json with --force - full restore mode...');
+  } else if (fs.existsSync(seedDataPath)) {
+    // seed-data.json exists but no --force, just sync sports/teams/betTypes
+    console.log('📦 Found seed-data.json - syncing sports/teams/betTypes only...');
+    await syncBaseData();
+    return;
+  } else {
+    // No seed-data.json - always sync sports/teams/betTypes (safe upsert)
+    console.log('🔄 Syncing sports/teams/betTypes...');
+    await syncBaseData();
+    return;
   }
 
-  // Check if seed-data.json exists (migration mode)
-  const seedDataPath = path.join(__dirname, 'seed-data.json');
+  // Full restore mode (seed-data.json + --force)
+  const seedDataPath2 = seedDataPath;
 
   if (fs.existsSync(seedDataPath)) {
     console.log('📦 Found seed-data.json - restoring data from backup...');
@@ -262,6 +263,89 @@ async function main() {
   }
 
   console.log('🎉 Seeding complete!');
+}
+
+// Safe sync function - only updates sports/teams/betTypes, NEVER touches bets/balance
+async function syncBaseData() {
+  const { SPORTS, TEAMS } = await import('../src/data/teams');
+  const { BET_TYPES } = await import('../src/data/betTypes');
+
+  // Upsert Sports and Teams (safe - won't delete existing)
+  for (const sportName of SPORTS) {
+    const sport = await prisma.sport.upsert({
+      where: { name: sportName },
+      update: {},
+      create: { name: sportName },
+    });
+
+    console.log(`✅ Synced sport: ${sportName}`);
+
+    for (const teamName of TEAMS[sportName]) {
+      await prisma.team.upsert({
+        where: {
+          sportId_name: {
+            sportId: sport.id,
+            name: teamName,
+          },
+        },
+        update: {},
+        create: {
+          name: teamName,
+          sportId: sport.id,
+        },
+      });
+    }
+
+    console.log(`  - Synced ${TEAMS[sportName].length} teams`);
+  }
+
+  // Upsert BetTypes (safe - won't delete existing)
+  for (const betType of BET_TYPES) {
+    await prisma.betType.upsert({
+      where: { code: betType.code },
+      update: {
+        name: betType.name,
+        description: betType.description,
+      },
+      create: {
+        code: betType.code,
+        name: betType.name,
+        description: betType.description,
+      },
+    });
+  }
+
+  console.log(`✅ Synced ${BET_TYPES.length} bet types`);
+
+  // Create balance ONLY if doesn't exist (never overwrite)
+  const existingBalance = await prisma.balance.findUnique({ where: { id: 'main' } });
+  if (!existingBalance) {
+    await prisma.balance.create({
+      data: {
+        id: 'main',
+        initialAmount: 5000,
+        currentAmount: 5000,
+        totalProfit: 0,
+        totalBets: 0,
+        wins: 0,
+        losses: 0,
+      },
+    });
+    console.log('✅ Created initial balance: $5,000');
+
+    await prisma.balanceHistory.create({
+      data: {
+        amount: 5000,
+        profit: 0,
+        type: 'INITIAL',
+      },
+    });
+    console.log('✅ Created initial balance history');
+  } else {
+    console.log('ℹ️ Balance exists - not modified');
+  }
+
+  console.log('🎉 Sync complete! (베팅 데이터 안전하게 보존됨)');
 }
 
 main()

@@ -1,23 +1,18 @@
 export const BET_TYPES = [
   {
-    code: 'SPREAD_PLUS',
-    name: '+핸디캡',
-    description: '언더독 스프레드 베팅',
+    code: 'ML',
+    name: '승패',
+    description: '머니라인 베팅 (승리팀 예측)',
   },
   {
-    code: 'SPREAD_MINUS',
-    name: '-핸디캡',
-    description: '페이버릿 스프레드 베팅',
+    code: 'SPREAD',
+    name: '핸디캡',
+    description: '핸디캡 스프레드 베팅',
   },
   {
-    code: 'OVER',
-    name: '오버',
-    description: '토탈 오버 베팅',
-  },
-  {
-    code: 'UNDER',
-    name: '언더',
-    description: '토탈 언더 베팅',
+    code: 'TOTAL',
+    name: '오버/언더',
+    description: '토탈 포인트/맵 오버언더 베팅',
   },
 ] as const;
 
