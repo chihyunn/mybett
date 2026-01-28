@@ -89,8 +89,106 @@ export default function BetHistoryTable({ bets, onResultInput, onDelete }: BetHi
     });
   };
 
-  return (
-    <div className="overflow-x-auto">
+  // Mobile Card View
+  const MobileCardView = () => (
+    <div className="md:hidden space-y-3 p-3">
+      {bets.map((bet) => (
+        <div
+          key={bet.id}
+          className="rounded-lg p-4"
+          style={{ background: 'var(--background)', border: '1px solid var(--card-border)' }}
+        >
+          {/* Header: Teams & Result Badge */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                {bet.teamA.name} vs {bet.teamB.name}
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                {bet.sport.name} · {formatDate(bet.createdAt)}
+              </div>
+            </div>
+            <div className="ml-2 flex-shrink-0">
+              {getResultBadge(bet.result)}
+            </div>
+          </div>
+
+          {/* Bet Info Grid */}
+          <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+            <div>
+              <div className="text-xs mb-0.5" style={{ color: 'var(--muted)' }}>베팅</div>
+              <div style={{ color: 'var(--foreground)' }}>
+                {bet.selectedTeam === 'A' ? bet.teamA.name : bet.teamB.name}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--muted)' }}>{bet.betType.name}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs mb-0.5" style={{ color: 'var(--muted)' }}>손익</div>
+              {bet.profitLoss !== null ? (
+                <div className={`font-medium ${bet.profitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {bet.profitLoss >= 0 ? '+' : ''}${bet.profitLoss.toLocaleString()}
+                </div>
+              ) : (
+                <div style={{ color: 'var(--muted)' }}>-</div>
+              )}
+            </div>
+          </div>
+
+          {/* Edge Info */}
+          <div className="flex justify-between items-center text-sm py-2 mb-3" style={{ borderTop: '1px solid var(--card-border)', borderBottom: '1px solid var(--card-border)' }}>
+            <div>
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>예상: </span>
+              <span className={`font-medium ${bet.predictedEdge >= 0.05 ? 'text-green-500' : bet.predictedEdge >= 0 ? 'text-yellow-500' : 'text-red-500'}`}>
+                {formatEdgePercent(bet.predictedEdge)}
+              </span>
+            </div>
+            <div>
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>실제: </span>
+              {bet.realizedEdge !== null ? (
+                <span className={`font-medium ${bet.realizedEdge >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatEdgePercent(bet.realizedEdge)}
+                </span>
+              ) : (
+                <span style={{ color: 'var(--muted)' }}>-</span>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          {bet.result === null && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => onResultInput(bet)}
+                className="flex-1 py-2.5 text-sm font-medium rounded-lg"
+                style={{
+                  background: isDark ? 'rgba(59, 130, 246, 0.2)' : '#eff6ff',
+                  color: isDark ? '#60a5fa' : '#2563eb',
+                }}
+              >
+                결과 입력
+              </button>
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(bet.id)}
+                  className="px-4 py-2.5 text-sm font-medium rounded-lg"
+                  style={{
+                    background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
+                    color: isDark ? '#f87171' : '#dc2626',
+                  }}
+                >
+                  삭제
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Desktop Table View
+  const DesktopTableView = () => (
+    <div className="hidden md:block overflow-x-auto">
       <table className="min-w-full">
         <thead style={{ background: 'var(--background)' }}>
           <tr>
@@ -151,7 +249,7 @@ export default function BetHistoryTable({ bets, onResultInput, onDelete }: BetHi
                   <div className="flex gap-1 justify-center">
                     <button
                       onClick={() => onResultInput(bet)}
-                      className="px-3 py-1 text-xs font-medium rounded"
+                      className="px-3 py-1.5 text-xs font-medium rounded"
                       style={{
                         background: isDark ? 'rgba(59, 130, 246, 0.2)' : '#eff6ff',
                         color: isDark ? '#60a5fa' : '#2563eb',
@@ -162,7 +260,7 @@ export default function BetHistoryTable({ bets, onResultInput, onDelete }: BetHi
                     {onDelete && (
                       <button
                         onClick={() => onDelete(bet.id)}
-                        className="px-2 py-1 text-xs font-medium rounded"
+                        className="px-2 py-1.5 text-xs font-medium rounded"
                         style={{
                           background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
                           color: isDark ? '#f87171' : '#dc2626',
@@ -181,5 +279,12 @@ export default function BetHistoryTable({ bets, onResultInput, onDelete }: BetHi
         </tbody>
       </table>
     </div>
+  );
+
+  return (
+    <>
+      <MobileCardView />
+      <DesktopTableView />
+    </>
   );
 }
