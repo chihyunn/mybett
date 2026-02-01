@@ -1,4 +1,4 @@
-export const SPORTS = ['NBA', 'NHL', 'MLB', 'NFL', 'LOL_LCK', 'LOL_LPL'] as const;
+export const SPORTS = ['NBA', 'NHL', 'MLB', 'NFL', 'EPL', 'LOL_LCK', 'LOL_LPL'] as const;
 export type SportName = (typeof SPORTS)[number];
 
 export const TEAMS: Record<SportName, string[]> = {
@@ -49,6 +49,14 @@ export const TEAMS: Record<SportName, string[]> = {
     'Atlanta Falcons', 'Carolina Panthers', 'New Orleans Saints', 'Tampa Bay Buccaneers',
     // NFC West
     'Arizona Cardinals', 'Los Angeles Rams', 'San Francisco 49ers', 'Seattle Seahawks',
+  ],
+  EPL: [
+    // English Premier League (20 teams)
+    'Arsenal', 'Aston Villa', 'AFC Bournemouth', 'Brentford',
+    'Brighton & Hove Albion', 'Chelsea', 'Crystal Palace', 'Everton',
+    'Fulham', 'Ipswich Town', 'Leicester City', 'Liverpool',
+    'Manchester City', 'Manchester United', 'Newcastle United', 'Nottingham Forest',
+    'Southampton', 'Tottenham Hotspur', 'West Ham United', 'Wolverhampton Wanderers',
   ],
   LOL_LCK: [
     // League of Legends Champions Korea (10 teams)
