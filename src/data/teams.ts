@@ -51,13 +51,13 @@ export const TEAMS: Record<SportName, string[]> = {
     'Arizona Cardinals', 'Los Angeles Rams', 'San Francisco 49ers', 'Seattle Seahawks',
   ],
   EPL: [
-    // English Premier League (21 teams)
+    // English Premier League (22 teams)
     'Arsenal', 'Aston Villa', 'AFC Bournemouth', 'Brentford',
     'Brighton & Hove Albion', 'Chelsea', 'Crystal Palace', 'Everton',
     'Fulham', 'Ipswich Town', 'Leicester City', 'Liverpool',
     'Manchester City', 'Manchester United', 'Newcastle United', 'Nottingham Forest',
     'Southampton', 'Tottenham Hotspur', 'West Ham United', 'Wolverhampton Wanderers',
-    'Leeds United',
+    'Leeds United', 'Sunderland',
   ],
   LOL_LCK: [
     // League of Legends Champions Korea (10 teams)
